@@ -1,5 +1,6 @@
 ﻿using Serilog.Configuration;
 using Serilog.Sinks.LogBee;
+using Serilog.Sinks.LogBee.RequestInfo;
 
 namespace Serilog;
 
@@ -9,16 +10,20 @@ namespace Serilog;
 public static class LoggerConfigurationLogBeeExtensions
 {
     public static LoggerConfiguration LogBee(
-            this LoggerSinkConfiguration loggerConfiguration,
-            LogBeeSinkConfiguration config)
+        this LoggerSinkConfiguration loggerConfiguration,
+        LogBeeApiKey apiKey,
+        IRequestInfoProvider? requestInfoProvider = null)
     {
         if (loggerConfiguration == null)
             throw new ArgumentNullException(nameof(loggerConfiguration));
 
-        if (config == null)
-            throw new ArgumentNullException(nameof(config));
+        if (apiKey == null)
+            throw new ArgumentNullException(nameof(apiKey));
 
-        var logBeeSink = new LogBeeSink(config);
+        var logBeeSink = new LogBeeSink(
+            apiKey,
+            requestInfoProvider ?? new ConsoleAppRequestInfoProvider()
+        );
 
         return loggerConfiguration.Sink(
             logBeeSink

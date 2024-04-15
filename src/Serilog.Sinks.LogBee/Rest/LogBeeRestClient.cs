@@ -7,29 +7,11 @@ namespace Serilog.Sinks.LogBee.Rest
     {
         private static readonly HttpClient HttpClient = new HttpClient();
 
-        private readonly string _organizationId;
-        private readonly string _applicationId;
-        private readonly Uri _logBeeUri;
+        private readonly LogBeeApiKey _apiKey;
         public LogBeeRestClient(
-            string organizationId,
-            string applicationId,
-            Uri logBeeUri)
+            LogBeeApiKey apiKey)
         {
-            if (string.IsNullOrWhiteSpace(organizationId))
-                throw new ArgumentNullException(nameof(organizationId));
-
-            if (string.IsNullOrWhiteSpace(applicationId))
-                throw new ArgumentNullException(nameof(applicationId));
-
-            if (logBeeUri == null)
-                throw new ArgumentNullException(nameof(logBeeUri));
-
-            if(!logBeeUri.IsAbsoluteUri)
-                throw new ArgumentException($"{nameof(logBeeUri)} must be an absolute URI");
-
-            _organizationId = organizationId;
-            _applicationId = applicationId;
-            _logBeeUri = logBeeUri;
+            _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         }
 
         public void CreateRequestLog(CreateRequestLogPayload payload)
@@ -37,7 +19,7 @@ namespace Serilog.Sinks.LogBee.Rest
             if (payload == null)
                 throw new ArgumentNullException(nameof(payload));
 
-            Uri uri = new Uri(_logBeeUri, "/request-logs");
+            Uri uri = new Uri(_apiKey.LogBeeUri, "/request-logs");
 
             string requestPayload = JsonSerializer.Serialize(payload);
 
@@ -54,7 +36,7 @@ namespace Serilog.Sinks.LogBee.Rest
             if (payload == null)
                 throw new ArgumentNullException(nameof(payload));
 
-            Uri uri = new Uri(_logBeeUri, "/request-logs");
+            Uri uri = new Uri(_apiKey.LogBeeUri, "/request-logs");
 
             string requestPayload = JsonSerializer.Serialize(payload);
 
