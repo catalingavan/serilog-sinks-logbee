@@ -5,14 +5,17 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 {
     internal class Logger
     {
-        private readonly List<CreateRequestLogPayload.LogMessagePayload> _logs;
-        private readonly List<CreateRequestLogPayload.ExceptionPayload> _exceptions;
+        public LogBeeSinkConfiguration Config { get; init; }
+        public List<CreateRequestLogPayload.LogMessagePayload> Logs { get; init; }
+        public List<CreateRequestLogPayload.ExceptionPayload> Exceptions { get; init; }
+
         private readonly DateTime _createdAt;
 
-        public Logger()
+        public Logger(LogBeeSinkConfiguration config)
         {
-            _logs = new();
-            _exceptions = new();
+            Config = config ?? throw new ArgumentNullException(nameof(config));
+            Logs = new();
+            Exceptions = new();
             _createdAt = DateTime.UtcNow;
         }
 
@@ -20,7 +23,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
         {
             int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - _createdAt).TotalMilliseconds)));
 
-            _logs.Add(new CreateRequestLogPayload.LogMessagePayload
+            Logs.Add(new CreateRequestLogPayload.LogMessagePayload
             {
                 LogLevel = logEvent.Level.ToString(),
                 Message = logEvent.RenderMessage(),
@@ -30,7 +33,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             if (logEvent.Exception != null)
             {
                 var type = logEvent.Exception.GetType();
-                _exceptions.Add(new CreateRequestLogPayload.ExceptionPayload
+                Exceptions.Add(new CreateRequestLogPayload.ExceptionPayload
                 {
                     ExceptionType = type.FullName ?? type.Name,
                     ExceptionMessage = logEvent.Exception.Message

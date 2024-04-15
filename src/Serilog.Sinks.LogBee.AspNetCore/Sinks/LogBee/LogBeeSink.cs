@@ -34,7 +34,7 @@ internal class LogBeeSink : ILogEventSink
         }
         else
         {
-            logger = new Logger();
+            logger = new Logger(_config);
             httpContextAccessor.HttpContext.Items.Add(HTTP_CONTEXT_LOGGER, logger);
         }
 
