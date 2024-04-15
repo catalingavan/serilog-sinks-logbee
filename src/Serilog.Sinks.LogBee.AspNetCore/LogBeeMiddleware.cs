@@ -13,15 +13,35 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
         public async Task InvokeAsync(HttpContext context)
         {
-            var test = new EnableBufferingReadInputStreamProvider();
-            var inputStream = test.ReadInputStream(context.Request);
+            HttpContextLogger? httpContextLogger = InternalHelpers.GetHttpContextLogger(context);
 
-            await _next(context);
+            if(httpContextLogger != null)
+            {
+                if (InternalHelpers.ShouldReadInputStream(context.Request.Headers, httpContextLogger.Config) &&
+                    httpContextLogger.Config.ShouldReadRequestBody(context.Request))
+                {
+                    httpContextLogger.RequestBody = InternalHelpers.WrapInTryCatch(() =>
+                    {
+                        var provider = new ReadInputStreamProvider();
+                        return provider.ReadInputStream(context.Request);
+                    });
+                }
+            }
 
-            if (!(context.Items.TryGetValue(LogBeeSink.HTTP_CONTEXT_LOGGER, out var val) && val is Logger logger))
-                return;
-
-            await logger.FlushAsync().ConfigureAwait(false);
+            try
+            {
+                await _next(context);
+            }
+            finally
+            {
+                if (httpContextLogger != null)
+                {
+                    await InternalHelpers.WrapInTryCatchAsync(async () =>
+                    {
+                        await httpContextLogger.Logger.FlushAsync().ConfigureAwait(false);
+                    });
+                }
+            }
         }
     }
 

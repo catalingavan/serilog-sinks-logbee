@@ -144,6 +144,17 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             return result;
         }
 
+        public static bool ShouldReadInputStream(IHeaderDictionary requestHeaders, LogBeeSinkAspNetCoreConfiguration config)
+        {
+            string? contentType = requestHeaders?.FirstOrDefault(p => string.Compare(p.Key, "Content-Type", StringComparison.OrdinalIgnoreCase) == 0).Value;
+            if (string.IsNullOrEmpty(contentType))
+                return false;
+
+            contentType = contentType.Trim().ToLowerInvariant();
+
+            return config.ReadRequestBodyContentTypes?.Any(p => contentType.Contains(p)) == true;
+        }
+
         public static T? WrapInTryCatch<T>(Func<T> fn)
         {
             if (fn == null)
@@ -159,6 +170,29 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             }
 
             return default;
+        }
+
+        public static async Task WrapInTryCatchAsync(Func<Task> fn)
+        {
+            if (fn == null)
+                throw new ArgumentNullException(nameof(fn));
+
+            try
+            {
+                await fn.Invoke();
+            }
+            catch (Exception)
+            {
+                // ignore
+            }
+        }
+
+        public static HttpContextLogger? GetHttpContextLogger(HttpContext context)
+        {
+            if (context.Items.TryGetValue(LogBeeSink.HTTP_CONTEXT_LOGGER, out var value))
+                return value as HttpContextLogger;
+
+            return null;
         }
     }
 }

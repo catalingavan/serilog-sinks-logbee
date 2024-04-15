@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Serilog.Sinks.LogBee;
 using Serilog.Sinks.LogBee.AspNetCore;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpContextAccessor();
@@ -18,7 +20,7 @@ builder.Services.AddSerilog((services, lc) => lc
         services,
         config =>
         {
-            config.ReadInputStreamContentTypes = new string[] { };
+            config.ShouldReadRequestBody = (req) => true;
         }
     ));
 
@@ -32,6 +34,14 @@ app.MapGet("/", (ILoggerFactory loggerFactory) =>
     logger.LogWarning("Hey, this is a warn log");
 
     return "Hello World!";
+});
+
+app.MapPost("/payload", ([FromBody] JsonElement payload, ILoggerFactory loggerFactory) =>
+{
+    var logger = loggerFactory.CreateLogger("MinimalApi");
+    logger.LogWarning("Hey, this is an endpoint with payload");
+
+    return payload.ToString();
 });
 
 app.UseLogBeeMiddleware();

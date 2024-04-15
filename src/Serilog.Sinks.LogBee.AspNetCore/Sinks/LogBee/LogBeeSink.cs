@@ -10,11 +10,11 @@ internal class LogBeeSink : ILogEventSink
 
     private readonly LogBeeApiKey _apiKey;
     private readonly IServiceProvider _serviceProvider;
-    private readonly LogBeeAspNetCoreConfiguration _config;
+    private readonly LogBeeSinkAspNetCoreConfiguration _config;
     public LogBeeSink(
         LogBeeApiKey apiKey,
         IServiceProvider serviceProvider,
-        LogBeeAspNetCoreConfiguration config)
+        LogBeeSinkAspNetCoreConfiguration config)
     {
         _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
@@ -30,17 +30,19 @@ internal class LogBeeSink : ILogEventSink
         if (httpContextAccessor == null || httpContextAccessor.HttpContext == null)
             return;
 
-        Logger logger;
+        HttpContextLogger httpContextLogger;
         if (httpContextAccessor.HttpContext.Items.ContainsKey(HTTP_CONTEXT_LOGGER))
         {
-            logger = (httpContextAccessor.HttpContext.Items[HTTP_CONTEXT_LOGGER] as Logger)!;
+            httpContextLogger = (httpContextAccessor.HttpContext.Items[HTTP_CONTEXT_LOGGER] as HttpContextLogger)!;
         }
         else
         {
-            logger = new Logger(_apiKey, new HttpContextRequestInfoProvider(httpContextAccessor.HttpContext, _config));
-            httpContextAccessor.HttpContext.Items.Add(HTTP_CONTEXT_LOGGER, logger);
+            var logger = new Logger(_apiKey, new HttpContextRequestInfoProvider(httpContextAccessor.HttpContext));
+            httpContextLogger = new HttpContextLogger(logger, _config);
+
+            httpContextAccessor.HttpContext.Items.Add(HTTP_CONTEXT_LOGGER, httpContextLogger);
         }
 
-        logger.Emit(logEvent);
+        httpContextLogger.Logger.Emit(logEvent);
     }
 }
