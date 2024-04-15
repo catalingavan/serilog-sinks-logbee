@@ -20,7 +20,11 @@ builder.Services.AddSerilog((services, lc) => lc
         services,
         config =>
         {
-            config.ShouldReadRequestBody = (req) => true;
+            config.ShouldLogRequest = (req) =>
+            {
+                var a = req.Request.Path.ToUriComponent();
+                return a != "/";
+            };
         }
     ));
 

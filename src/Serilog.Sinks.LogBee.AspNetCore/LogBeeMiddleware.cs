@@ -34,7 +34,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             }
             finally
             {
-                if (httpContextLogger != null)
+                if (httpContextLogger != null && httpContextLogger.Config.ShouldLogRequest(context))
                 {
                     await InternalHelpers.WrapInTryCatchAsync(async () =>
                     {

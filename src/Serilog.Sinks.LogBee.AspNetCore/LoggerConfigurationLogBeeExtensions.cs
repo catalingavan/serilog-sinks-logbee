@@ -12,6 +12,14 @@ public static class LoggerConfigurationLogBeeExtensions
     public static LoggerConfiguration LogBee(
         this LoggerSinkConfiguration loggerConfiguration,
         LogBeeApiKey apiKey,
+        IServiceProvider serviceProvider)
+    {
+        return LogBee(loggerConfiguration, apiKey, serviceProvider, (config) => { });
+    }
+
+    public static LoggerConfiguration LogBee(
+        this LoggerSinkConfiguration loggerConfiguration,
+        LogBeeApiKey apiKey,
         IServiceProvider serviceProvider,
         Action<LogBeeSinkAspNetCoreConfiguration> configAction)
     {
@@ -20,6 +28,9 @@ public static class LoggerConfigurationLogBeeExtensions
 
         if (serviceProvider == null)
             throw new ArgumentNullException(nameof(serviceProvider));
+
+        if (configAction == null)
+            throw new ArgumentNullException(nameof(configAction));
 
         var config = new LogBeeSinkAspNetCoreConfiguration();
         configAction(config);
