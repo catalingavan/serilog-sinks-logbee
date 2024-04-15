@@ -18,8 +18,8 @@ namespace Serilog.Sinks.LogBee.Rest
             if (exceptions == null)
                 throw new ArgumentNullException(nameof(exceptions));
 
-            DateTime startedAt = requestInfoProvider.StartedAt;
-            var response = requestInfoProvider.ResponseProperties;
+            DateTime startedAt = requestInfoProvider.GetStartedAt();
+            var response = requestInfoProvider.GetResponseProperties();
             int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - startedAt).TotalMilliseconds)));
 
             CreateRequestLogPayload payload = new CreateRequestLogPayload
@@ -33,9 +33,9 @@ namespace Serilog.Sinks.LogBee.Rest
                 },
                 HttpProperties = new CreateRequestLogPayload.HttpPropertiesPayload
                 {
-                    AbsoluteUri = requestInfoProvider.AbsoluteUri.ToString(),
-                    Method = requestInfoProvider.HttpMethod,
-                    Request = ToPayload(requestInfoProvider.RequestProperties),
+                    AbsoluteUri = requestInfoProvider.GetAbsoluteUri().ToString(),
+                    Method = requestInfoProvider.GetHttpMethod(),
+                    Request = ToPayload(requestInfoProvider.GetRequestProperties()),
                     Response = new CreateRequestLogPayload.HttpPropertiesPayload.ResponsePropertiesPayload
                     {
                         StatusCode = response.StatusCode,

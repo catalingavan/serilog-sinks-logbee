@@ -2,10 +2,10 @@
 {
     public interface IRequestInfoProvider
     {
-        DateTime StartedAt { get; }
-        Uri AbsoluteUri { get; }
-        string HttpMethod { get; }
-        RequestProperties RequestProperties { get; }
-        ResponseProperties ResponseProperties { get; }
+        DateTime GetStartedAt();
+        Uri GetAbsoluteUri();
+        string GetHttpMethod();
+        RequestProperties GetRequestProperties();
+        ResponseProperties GetResponseProperties();
     }
 }

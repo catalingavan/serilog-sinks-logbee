@@ -8,15 +8,15 @@
         private RequestProperties _requestProperties;
         private ResponseProperties _responseProperties;
         public ConsoleAppRequestInfoProvider(
-            Uri absoluteUri,
-            string httpMethod = "GET",
-            RequestProperties? requestProperties = null)
+            string url = "http://application",
+            string httpMethod = "GET")
         {
-            if (absoluteUri == null)
-                throw new ArgumentNullException(nameof(absoluteUri));
+            Uri? absoluteUri = null;
+            if(!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
+                absoluteUri = uri.IsAbsoluteUri ? uri : new Uri(new Uri("http://application"), uri);
 
-            if (!absoluteUri.IsAbsoluteUri)
-                throw new ArgumentException($"{nameof(absoluteUri)} must be an absolute URI");
+            if (absoluteUri == null)
+                absoluteUri = new Uri("http://application", UriKind.Absolute);
 
             if (string.IsNullOrWhiteSpace(httpMethod))
                 throw new ArgumentNullException(nameof(httpMethod));
@@ -24,15 +24,15 @@
             _startedAt = DateTime.UtcNow;
             _absoluteUri = absoluteUri;
             _httpMethod = httpMethod;
-            _requestProperties = requestProperties ?? new();
+            _requestProperties = new();
             _responseProperties = new ResponseProperties(200);
         }
 
-        public DateTime StartedAt => _startedAt;
-        public Uri AbsoluteUri => _absoluteUri;
-        public string HttpMethod => _httpMethod;
-        public RequestProperties RequestProperties => _requestProperties;
-        public ResponseProperties ResponseProperties => _responseProperties;
+        public DateTime GetStartedAt() => _startedAt;
+        public Uri GetAbsoluteUri() => _absoluteUri;
+        public string GetHttpMethod() => _httpMethod;
+        public RequestProperties GetRequestProperties() => _requestProperties;
+        public ResponseProperties GetResponseProperties() => _responseProperties;
 
         public void SetRequest(RequestProperties requestProperties)
         {

@@ -12,7 +12,8 @@ Log.Logger =
             "c13a9c8e-6592-4693-a041-d13ccd31b5d8",
             "http://localhost:5265/",
             new ConsoleAppRequestInfoProvider(
-                new Uri("http://application/program/main")
+                "http://application/program/main",
+                "POST"
             )
         ))
         .CreateLogger();
