@@ -6,15 +6,15 @@ namespace Serilog.Sinks.LogBee.AspNetCore;
 
 internal class LogBeeSink : ILogEventSink
 {
-    public const string HTTP_CONTEXT_LOGGER = "logBee.Logger";
+    public const string HTTP_CONTEXT_LOGGER = "Serilog.LogBee.Logger";
 
-    private readonly LogBeeSinkConfiguration _config;
+    private readonly LogBeeApiKey _apiKey;
     private readonly IServiceProvider _serviceProvider;
     public LogBeeSink(
-        LogBeeSinkConfiguration config,
+        LogBeeApiKey apiKey,
         IServiceProvider serviceProvider)
     {
-        _config = config ?? throw new ArgumentNullException(nameof(config));
+        _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     }
 
@@ -34,7 +34,7 @@ internal class LogBeeSink : ILogEventSink
         }
         else
         {
-            logger = new Logger(_config);
+            logger = new Logger(_apiKey, new HttpContextRequestInfoProvider(httpContextAccessor.HttpContext));
             httpContextAccessor.HttpContext.Items.Add(HTTP_CONTEXT_LOGGER, logger);
         }
 

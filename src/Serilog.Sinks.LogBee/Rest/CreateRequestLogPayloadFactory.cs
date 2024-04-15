@@ -19,6 +19,7 @@ namespace Serilog.Sinks.LogBee.Rest
                 throw new ArgumentNullException(nameof(exceptions));
 
             DateTime startedAt = requestInfoProvider.GetStartedAt();
+            var request = requestInfoProvider.GetRequestProperties();
             var response = requestInfoProvider.GetResponseProperties();
             int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - startedAt).TotalMilliseconds)));
 
@@ -33,9 +34,16 @@ namespace Serilog.Sinks.LogBee.Rest
                 },
                 HttpProperties = new CreateRequestLogPayload.HttpPropertiesPayload
                 {
-                    AbsoluteUri = requestInfoProvider.GetAbsoluteUri().ToString(),
-                    Method = requestInfoProvider.GetHttpMethod(),
-                    Request = ToPayload(requestInfoProvider.GetRequestProperties()),
+                    AbsoluteUri = request.AbsoluteUri.ToString(),
+                    Method = request.Method,
+                    Request = new CreateRequestLogPayload.HttpPropertiesPayload.RequestPropertiesPayload
+                    {
+                        Headers = request.Headers,
+                        FormData = request.FormData,
+                        Claims = request.Claims,
+                        Cookies = request.Cookies,
+                        InputStream = request.InputStream
+                    },
                     Response = new CreateRequestLogPayload.HttpPropertiesPayload.ResponsePropertiesPayload
                     {
                         StatusCode = response.StatusCode,
@@ -48,19 +56,6 @@ namespace Serilog.Sinks.LogBee.Rest
             };
 
             return payload;
-        }
-
-        private static CreateRequestLogPayload.HttpPropertiesPayload.RequestPropertiesPayload ToPayload(RequestProperties requestProperties)
-        {
-            return new CreateRequestLogPayload.HttpPropertiesPayload.RequestPropertiesPayload
-            {
-                Headers = requestProperties.Headers,
-                FormData = requestProperties.FormData,
-                Claims = requestProperties.Claims,
-                Cookies = requestProperties.Cookies,
-                ServerVariables = requestProperties.ServerVariables,
-                InputStream = requestProperties.InputStream
-            };
         }
     }
 }

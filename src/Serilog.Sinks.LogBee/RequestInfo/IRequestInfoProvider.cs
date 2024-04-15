@@ -3,8 +3,6 @@
     public interface IRequestInfoProvider
     {
         DateTime GetStartedAt();
-        Uri GetAbsoluteUri();
-        string GetHttpMethod();
         RequestProperties GetRequestProperties();
         ResponseProperties GetResponseProperties();
     }

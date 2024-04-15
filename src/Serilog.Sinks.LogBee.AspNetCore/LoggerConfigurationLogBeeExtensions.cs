@@ -10,9 +10,7 @@ public static class LoggerConfigurationLogBeeExtensions
 {
     public static LoggerConfiguration LogBee(
         this LoggerSinkConfiguration loggerConfiguration,
-        string organizationId,
-        string applicationId,
-        string logBeeEndpoint,
+        LogBeeApiKey apiKey,
         IServiceProvider serviceProvider)
     {
         if (loggerConfiguration == null)
@@ -21,9 +19,7 @@ public static class LoggerConfigurationLogBeeExtensions
         if (serviceProvider == null)
             throw new ArgumentNullException(nameof(serviceProvider));
 
-        var config = new Serilog.Sinks.LogBee.AspNetCore.LogBeeSinkConfiguration(organizationId, applicationId, logBeeEndpoint);
-
-        var logBeeSink = new Serilog.Sinks.LogBee.AspNetCore.LogBeeSink(config, serviceProvider);
+        var logBeeSink = new Serilog.Sinks.LogBee.AspNetCore.LogBeeSink(apiKey, serviceProvider);
 
         return loggerConfiguration.Sink(
             logBeeSink

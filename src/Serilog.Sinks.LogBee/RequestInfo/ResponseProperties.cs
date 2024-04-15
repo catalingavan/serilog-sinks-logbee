@@ -3,17 +3,12 @@
     public class ResponseProperties
     {
         public int StatusCode { get; init; }
-        public Dictionary<string, string>? Headers { get; init; }
-        public long ContentLength { get; init; }
+        public Dictionary<string, string>? Headers { get; set; }
+        public long ContentLength { get; set; }
 
-        public ResponseProperties(
-            int statusCode,
-            Dictionary<string, string>? headers = null,
-            long? contentLength = null)
+        public ResponseProperties(int statusCode)
         {
             StatusCode = statusCode;
-            Headers = headers;
-            ContentLength = Math.Max(0, contentLength ?? 0);
         }
     }
 }

@@ -3,8 +3,6 @@
     public class ConsoleAppRequestInfoProvider : IRequestInfoProvider
     {
         private readonly DateTime _startedAt;
-        private readonly Uri _absoluteUri;
-        private readonly string _httpMethod;
         private RequestProperties _requestProperties;
         private ResponseProperties _responseProperties;
         public ConsoleAppRequestInfoProvider(
@@ -22,15 +20,11 @@
                 throw new ArgumentNullException(nameof(httpMethod));
 
             _startedAt = DateTime.UtcNow;
-            _absoluteUri = absoluteUri;
-            _httpMethod = httpMethod;
-            _requestProperties = new();
+            _requestProperties = new(absoluteUri, httpMethod);
             _responseProperties = new ResponseProperties(200);
         }
 
         public DateTime GetStartedAt() => _startedAt;
-        public Uri GetAbsoluteUri() => _absoluteUri;
-        public string GetHttpMethod() => _httpMethod;
         public RequestProperties GetRequestProperties() => _requestProperties;
         public ResponseProperties GetResponseProperties() => _responseProperties;
 

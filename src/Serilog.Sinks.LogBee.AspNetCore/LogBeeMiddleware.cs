@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Serilog.Sinks.LogBee.Rest;
+using Serilog.Sinks.LogBee.AspNetCore.ReadInputStream;
 
 namespace Serilog.Sinks.LogBee.AspNetCore
 {
@@ -14,25 +14,15 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
         public async Task InvokeAsync(HttpContext context)
         {
+            var test = new EnableBufferingReadInputStreamProvider();
+            var inputStream = test.ReadInputStream(context.Request);
+
             await _next(context);
 
             if (!(context.Items.TryGetValue(LogBeeSink.HTTP_CONTEXT_LOGGER, out var val) && val is Logger logger))
                 return;
 
-            var payload = CreateRequestLogPayloadFactory.Create(
-                new HttpContextRequestInfoProvider(context),
-                logger.Logs,
-                logger.Exceptions
-            );
-            payload.OrganizationId = logger.Config.OrganizationId;
-            payload.ApplicationId = logger.Config.ApplicationId;
-
-            var client = new LogBeeRestClient(
-                logger.Config.OrganizationId,
-                logger.Config.ApplicationId,
-                logger.Config.LogBeeUri
-            );
-            await client.CreateRequestLogAsync(payload);
+            await logger.FlushAsync().ConfigureAwait(false);
         }
     }
 
