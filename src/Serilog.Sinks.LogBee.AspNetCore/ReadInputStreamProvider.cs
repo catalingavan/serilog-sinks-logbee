@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Text;
 
-namespace Serilog.Sinks.LogBee.AspNetCore.ReadInputStream
+namespace Serilog.Sinks.LogBee.AspNetCore
 {
-    internal class EnableBufferingReadInputStreamProvider : IReadInputStreamProvider
+    internal class ReadInputStreamProvider
     {
         public string? ReadInputStream(HttpRequest request)
         {

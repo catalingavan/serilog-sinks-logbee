@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Serilog.Sinks.LogBee.AspNetCore.ReadInputStream;
 
 namespace Serilog.Sinks.LogBee.AspNetCore
 {

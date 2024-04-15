@@ -7,10 +7,13 @@ namespace Serilog.Sinks.LogBee.AspNetCore
     {
         private readonly HttpContext _httpContext;
         private readonly DateTime _startedAt;
+        private readonly LogBeeAspNetCoreConfiguration _config;
         public HttpContextRequestInfoProvider(
-            HttpContext httpContext)
+            HttpContext httpContext,
+            LogBeeAspNetCoreConfiguration config)
         {
             _httpContext = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
             _startedAt = DateTime.UtcNow;
         }
 

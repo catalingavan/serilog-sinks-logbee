@@ -1,5 +1,6 @@
 ﻿using Serilog.Configuration;
 using Serilog.Sinks.LogBee;
+using Serilog.Sinks.LogBee.AspNetCore;
 
 namespace Serilog;
 
@@ -11,7 +12,8 @@ public static class LoggerConfigurationLogBeeExtensions
     public static LoggerConfiguration LogBee(
         this LoggerSinkConfiguration loggerConfiguration,
         LogBeeApiKey apiKey,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        Action<LogBeeAspNetCoreConfiguration> configAction)
     {
         if (loggerConfiguration == null)
             throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -19,7 +21,10 @@ public static class LoggerConfigurationLogBeeExtensions
         if (serviceProvider == null)
             throw new ArgumentNullException(nameof(serviceProvider));
 
-        var logBeeSink = new Serilog.Sinks.LogBee.AspNetCore.LogBeeSink(apiKey, serviceProvider);
+        var config = new LogBeeAspNetCoreConfiguration();
+        configAction(config);
+
+        var logBeeSink = new Serilog.Sinks.LogBee.AspNetCore.LogBeeSink(apiKey, serviceProvider, config);
 
         return loggerConfiguration.Sink(
             logBeeSink

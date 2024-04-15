@@ -10,12 +10,15 @@ internal class LogBeeSink : ILogEventSink
 
     private readonly LogBeeApiKey _apiKey;
     private readonly IServiceProvider _serviceProvider;
+    private readonly LogBeeAspNetCoreConfiguration _config;
     public LogBeeSink(
         LogBeeApiKey apiKey,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        LogBeeAspNetCoreConfiguration config)
     {
         _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _config = config ?? throw new ArgumentNullException(nameof(config));
     }
 
     public void Emit(LogEvent logEvent)
@@ -34,7 +37,7 @@ internal class LogBeeSink : ILogEventSink
         }
         else
         {
-            logger = new Logger(_apiKey, new HttpContextRequestInfoProvider(httpContextAccessor.HttpContext));
+            logger = new Logger(_apiKey, new HttpContextRequestInfoProvider(httpContextAccessor.HttpContext, _config));
             httpContextAccessor.HttpContext.Items.Add(HTTP_CONTEXT_LOGGER, logger);
         }
 
