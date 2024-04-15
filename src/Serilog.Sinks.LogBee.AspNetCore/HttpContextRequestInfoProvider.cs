@@ -16,6 +16,6 @@ namespace Serilog.Sinks.LogBee.AspNetCore
         public Uri AbsoluteUri => new Uri(new Uri("http://web-app.com"), _httpContextAccessor.HttpContext.Request.Path.ToString());
         public string HttpMethod => _httpContextAccessor.HttpContext.Request.Method;
         public RequestProperties RequestProperties => new();
-        public ResponseProperties ResponseProperties => new();
+        public ResponseProperties ResponseProperties => new(200);
     }
 }

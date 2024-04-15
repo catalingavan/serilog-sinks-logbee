@@ -2,7 +2,7 @@
 
 namespace Serilog.Sinks.LogBee;
 
-public class LogBeeSinkConfiguration
+internal class LogBeeSinkConfiguration
 {
     public string OrganizationId { get; init; }
     public string ApplicationId { get; init; }

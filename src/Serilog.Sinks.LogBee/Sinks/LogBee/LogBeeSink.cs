@@ -38,7 +38,7 @@ internal class LogBeeSink : ILogEventSink, IDisposable
 
     public void Emit(LogEvent logEvent)
     {
-        DateTime startedAt = _config.RequestInfoProvider.StartedAt;
+        DateTime startedAt = _requestInfoProviderInstance.Value.StartedAt;
         int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - startedAt).TotalMilliseconds)));
 
         _logs.Add(new CreateRequestLogPayload.LogMessagePayload
@@ -69,5 +69,6 @@ internal class LogBeeSink : ILogEventSink, IDisposable
         _logBeeClient.CreateRequestLog(payload);
 
         _logs = new();
+        _exceptions = new();
     }
 }
