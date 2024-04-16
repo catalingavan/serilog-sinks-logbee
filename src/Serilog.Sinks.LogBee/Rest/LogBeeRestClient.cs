@@ -1,9 +1,6 @@
-﻿using System.Text;
-using System.Text.Json;
-
-namespace Serilog.Sinks.LogBee.Rest
+﻿namespace Serilog.Sinks.LogBee.Rest
 {
-    internal class LogBeeRestClient : ILogBeeRestClient
+    internal class LogBeeRestClient
     {
         private static readonly HttpClient HttpClient = new HttpClient();
 
@@ -14,38 +11,38 @@ namespace Serilog.Sinks.LogBee.Rest
             _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         }
 
-        public void CreateRequestLog(CreateRequestLogPayload payload)
+        public void CreateRequestLog(HttpContent content)
         {
-            if (payload == null)
-                throw new ArgumentNullException(nameof(payload));
+            if (content == null)
+                throw new ArgumentNullException(nameof(content));
 
-            Uri uri = new Uri(_apiKey.LogBeeUri, "/request-logs");
+            using (content)
+            {
+                Uri uri = new Uri(_apiKey.LogBeeUri, "/request-logs");
 
-            string requestPayload = JsonSerializer.Serialize(payload);
+                using var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri);
+                httpRequest.Content = content;
+                using HttpResponseMessage response = HttpClient.Send(httpRequest);
 
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri);
-            using HttpContent content = new StringContent(requestPayload, Encoding.UTF8, "application/json");
-            httpRequest.Content = content;
-            using HttpResponseMessage response = HttpClient.Send(httpRequest);
-            
-            Console.WriteLine($"Response: {response.StatusCode}");
+                Console.WriteLine($"Response: {response.StatusCode}");
+            }
         }
 
-        public async Task CreateRequestLogAsync(CreateRequestLogPayload payload)
+        public async Task CreateRequestLogAsync(HttpContent content)
         {
-            if (payload == null)
-                throw new ArgumentNullException(nameof(payload));
+            if (content == null)
+                throw new ArgumentNullException(nameof(content));
 
-            Uri uri = new Uri(_apiKey.LogBeeUri, "/request-logs");
+            using (content)
+            {
+                Uri uri = new Uri(_apiKey.LogBeeUri, "/request-logs");
 
-            string requestPayload = JsonSerializer.Serialize(payload);
+                using var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri);
+                httpRequest.Content = content;
+                using HttpResponseMessage response = await HttpClient.SendAsync(httpRequest);
 
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri);
-            using HttpContent content = new StringContent(requestPayload, Encoding.UTF8, "application/json");
-            httpRequest.Content = content;
-            using HttpResponseMessage response = await HttpClient.SendAsync(httpRequest);
-
-            Console.WriteLine($"Response: {response.StatusCode}");
+                Console.WriteLine($"Response: {response.StatusCode}");
+            }
         }
     }
 }

@@ -30,6 +30,7 @@
         public string? GetMachineName() => InternalHelpers.GetMachineName();
         public RequestProperties GetRequestProperties() => _requestProperties;
         public ResponseProperties GetResponseProperties() => _responseProperties;
+        public List<LoggedFile> GetFiles() => _files.Select(p => new LoggedFile(p.TempFile.FileName, p.FileName, p.FileSize)).ToList();
 
         public void SetRequest(RequestProperties requestProperties)
         {
@@ -39,7 +40,6 @@
         {
             _responseProperties = responseProperties ?? throw new ArgumentNullException(nameof(responseProperties));
         }
-
         public void LogAsFile(string contents, string? fileName = null)
         {
             FileLog? file = FileLog.Create(contents, fileName, 5 * 1024 * 1024);

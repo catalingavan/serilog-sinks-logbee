@@ -1,6 +1,6 @@
 ﻿namespace Serilog.Sinks.LogBee.AspNetCore
 {
-    internal class HttpContextLogger
+    internal class HttpContextLogger : IDisposable
     {
         public Logger Logger { get; init; }
         public LogBeeSinkAspNetCoreConfiguration Config { get; init; }
@@ -13,6 +13,11 @@
         {
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             Config = config ?? throw new ArgumentNullException(nameof(config));
+        }
+
+        public void Dispose()
+        {
+            Logger.RequestInfoProvider.Dispose();
         }
     }
 }

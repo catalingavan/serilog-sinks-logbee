@@ -6,11 +6,15 @@ namespace Serilog.Sinks.LogBee.Rest
     {
         public static CreateRequestLogPayload Create(
             IRequestInfoProvider requestInfoProvider,
+            LogBeeApiKey apiKey,
             List<CreateRequestLogPayload.LogMessagePayload> logs,
             List<CreateRequestLogPayload.ExceptionPayload> exceptions)
         {
             if (requestInfoProvider == null)
                 throw new ArgumentNullException(nameof(requestInfoProvider));
+
+            if (apiKey == null)
+                throw new ArgumentNullException(nameof(apiKey));
 
             if (logs == null)
                 throw new ArgumentNullException(nameof(logs));
@@ -26,6 +30,8 @@ namespace Serilog.Sinks.LogBee.Rest
             CreateRequestLogPayload payload = new CreateRequestLogPayload
             {
                 StartedAt = startedAt,
+                OrganizationId = apiKey.OrganizationId,
+                ApplicationId = apiKey.ApplicationId,
                 DurationInMilliseconds = duration,
                 IntegrationClient = new CreateRequestLogPayload.IntegrationClientPayload
                 {

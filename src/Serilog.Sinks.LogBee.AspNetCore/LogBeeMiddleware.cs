@@ -21,9 +21,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             }
 
             if (context.Response.Body != null && context.Response.Body is MirrorStreamDecorator == false)
-            {
                 context.Response.Body = new MirrorStreamDecorator(context.Response.Body);
-            }
 
             if (InternalHelpers.ShouldReadInputStream(context.Request.Headers, httpContextLogger.Config) &&
                 httpContextLogger.Config.ShouldReadRequestBody(context.Request))
@@ -48,7 +46,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
                     string? responseBody = InternalHelpers.ReadStreamAsString(responseStream.MirrorStream, responseStream.Encoding);
                     if (!string.IsNullOrEmpty(responseBody))
-                        httpContextLogger.Logger.LogAsFile(responseBody, "Response.txt");
+                        httpContextLogger.Logger.RequestInfoProvider.LogAsFile(responseBody, "Response.txt");
 
                     responseStream.MirrorStream.Dispose();
                 }
@@ -61,7 +59,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                     });
                 }
 
-                httpContextLogger.Logger.Dispose();
+                httpContextLogger.Dispose();
             }
         }
 

@@ -20,6 +20,8 @@ namespace Serilog.Sinks.LogBee
             _exceptions = new();
         }
 
+        public IRequestInfoProvider RequestInfoProvider => _requestInfoProvider;
+
         public void Emit(LogEvent logEvent)
         {
             if (logEvent == null)
@@ -48,30 +50,28 @@ namespace Serilog.Sinks.LogBee
 
         public void Flush()
         {
-            var payload = CreateRequestLogPayloadFactory.Create(
+            var content = InternalHelpers.CreateHttpContent(
                 _requestInfoProvider,
+                _apiKey,
                 _logs,
                 _exceptions
             );
-            payload.OrganizationId = _apiKey.OrganizationId;
-            payload.ApplicationId = _apiKey.ApplicationId;
 
             var client = new LogBeeRestClient(_apiKey);
-            client.CreateRequestLog(payload);
+            client.CreateRequestLog(content);
         }
 
         public async Task FlushAsync()
         {
-            var payload = CreateRequestLogPayloadFactory.Create(
+            var content = InternalHelpers.CreateHttpContent(
                 _requestInfoProvider,
+                _apiKey,
                 _logs,
                 _exceptions
             );
-            payload.OrganizationId = _apiKey.OrganizationId;
-            payload.ApplicationId = _apiKey.ApplicationId;
 
             var client = new LogBeeRestClient(_apiKey);
-            await client.CreateRequestLogAsync(payload).ConfigureAwait(false);
+            await client.CreateRequestLogAsync(content).ConfigureAwait(false);
         }
     }
 }
