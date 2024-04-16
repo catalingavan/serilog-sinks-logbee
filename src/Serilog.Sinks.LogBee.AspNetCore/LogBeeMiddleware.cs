@@ -46,7 +46,10 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
                     string? responseBody = InternalHelpers.ReadStreamAsString(responseStream.MirrorStream, responseStream.Encoding);
                     if (!string.IsNullOrEmpty(responseBody))
-                        httpContextLogger.Logger.RequestInfoProvider.LogAsFile(responseBody, "Response.txt");
+                    {
+                        string fileName = InternalHelpers.GetResponseFileName(context.Response.Headers);
+                        httpContextLogger.Logger.RequestInfoProvider.LogAsFile(responseBody, fileName);
+                    }
 
                     responseStream.MirrorStream.Dispose();
                 }

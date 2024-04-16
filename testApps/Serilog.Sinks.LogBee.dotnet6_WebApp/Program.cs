@@ -37,7 +37,7 @@ app.MapPost("/payload", ([FromBody] JsonElement payload, ILoggerFactory loggerFa
     var logger = loggerFactory.CreateLogger("MinimalApi");
     logger.LogWarning("Hey, this is an endpoint with payload");
 
-    return payload.ToString();
+    return Results.Text(payload.ToString(), "application/json");
 });
 
 app.UseLogBeeMiddleware();

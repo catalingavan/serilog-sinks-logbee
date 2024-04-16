@@ -190,5 +190,26 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
             return content;
         }
+
+        public static string GetResponseFileName(IHeaderDictionary responseHeaders)
+        {
+            string defaultValue = "Response.txt";
+            if (responseHeaders == null)
+                return defaultValue;
+
+            string contentType = responseHeaders.FirstOrDefault(p => string.Compare(p.Key, "Content-Type", StringComparison.OrdinalIgnoreCase) == 0).Value.ToString();
+            contentType = contentType.ToLowerInvariant();
+
+            if (contentType.Contains("/json"))
+                return "Response.json";
+
+            if (contentType.Contains("/xml"))
+                return "Response.xml";
+
+            if (contentType.Contains("/html"))
+                return "Response.html";
+
+            return defaultValue;
+        }
     }
 }
