@@ -11,15 +11,17 @@ public static class LoggerConfigurationLogBeeExtensions
 {
     public static LoggerConfiguration LogBee(
         this LoggerSinkConfiguration loggerConfiguration,
-        LogBeeApiKey apiKey)
+        LogBeeApiKey apiKey,
+        Action<LogBeeSinkConfiguration>? configAction = null)
     {
-        return LogBee(loggerConfiguration, apiKey, new ConsoleAppContextProvider());
+        return LogBee(loggerConfiguration, apiKey, new ConsoleAppContextProvider(), configAction);
     }
 
     public static LoggerConfiguration LogBee(
         this LoggerSinkConfiguration loggerConfiguration,
         LogBeeApiKey apiKey,
-        ContextProvider contextProvider)
+        ContextProvider contextProvider,
+        Action<LogBeeSinkConfiguration>? configAction = null)
     {
         if (loggerConfiguration == null)
             throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -30,9 +32,13 @@ public static class LoggerConfigurationLogBeeExtensions
         if (apiKey == null)
             throw new ArgumentNullException(nameof(apiKey));
 
+        var config = new LogBeeSinkConfiguration();
+        configAction?.Invoke(config);
+
         var logBeeSink = new LogBeeSink(
             apiKey,
-            contextProvider
+            contextProvider,
+            config
         );
 
         return loggerConfiguration.Sink(

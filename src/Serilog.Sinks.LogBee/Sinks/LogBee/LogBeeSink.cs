@@ -9,9 +9,10 @@ internal class LogBeeSink : ILogEventSink, IDisposable
     private readonly LoggerContext _loggerContext;
     public LogBeeSink(
         LogBeeApiKey apiKey,
-        ContextProvider contextProvider)
+        ContextProvider contextProvider,
+        LogBeeSinkConfiguration config)
     {
-        _loggerContext = new LoggerContext(contextProvider, apiKey);
+        _loggerContext = new LoggerContext(contextProvider, apiKey, config);
     }
 
     public void Emit(LogEvent logEvent)

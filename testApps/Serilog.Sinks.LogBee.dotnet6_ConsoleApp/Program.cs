@@ -15,7 +15,12 @@ Log.Logger =
                 "c13a9c8e-6592-4693-a041-d13ccd31b5d8",
                 "http://localhost:5265/"
             ),
-            contextProvider
+            contextProvider,
+            (config) =>
+            {
+                config.MaximumAllowedFileSizeInBytes = 5;
+                config.True = false;
+            }
         )
         .CreateLogger();
 
@@ -28,7 +33,10 @@ while(i < 5)
     System.Threading.Thread.Sleep(500);
 
     if (i >= 4)
+    {
+        contextProvider.LogAsFile("1234" + i, "Test1.txt");
         contextProvider.LogAsFile($"This is a file content {i}", "Test.txt");
+    }
 }
 
 Log.CloseAndFlush();

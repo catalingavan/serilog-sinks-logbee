@@ -8,14 +8,17 @@ namespace Serilog.Sinks.LogBee
     {
         private readonly ContextProvider _contextProvider;
         private readonly LogBeeApiKey _apiKey;
+        private readonly LogBeeSinkConfiguration _config;
         private readonly List<CreateRequestLogPayload.LogMessagePayload> _logs;
         private readonly List<CreateRequestLogPayload.ExceptionPayload> _exceptions;
         public LoggerContext(
             ContextProvider contextProvider,
-            LogBeeApiKey apiKey)
+            LogBeeApiKey apiKey,
+            LogBeeSinkConfiguration config)
         {
             _contextProvider = contextProvider ?? throw new ArgumentNullException(nameof(contextProvider));
             _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
             _logs = new();
             _exceptions = new();
         }
@@ -54,7 +57,7 @@ namespace Serilog.Sinks.LogBee
         public void Flush()
         {
             var payload = InternalHelpers.CreateRequestLogPayload(this);
-            var httpContent = InternalHelpers.CreateHttpContent(this, payload);
+            var httpContent = InternalHelpers.CreateHttpContent(this, payload, _config);
 
             var client = new LogBeeRestClient(_apiKey);
             client.CreateRequestLog(httpContent);
@@ -63,7 +66,7 @@ namespace Serilog.Sinks.LogBee
         public async Task FlushAsync()
         {
             var payload = InternalHelpers.CreateRequestLogPayload(this);
-            var httpContent = InternalHelpers.CreateHttpContent(this, payload);
+            var httpContent = InternalHelpers.CreateHttpContent(this, payload, _config);
 
             var client = new LogBeeRestClient(_apiKey);
             await client.CreateRequestLogAsync(httpContent).ConfigureAwait(false);

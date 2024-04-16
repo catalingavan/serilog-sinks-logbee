@@ -76,13 +76,16 @@ namespace Serilog.Sinks.LogBee
             return payload;
         }
 
-        public static HttpContent CreateHttpContent(LoggerContext logger, CreateRequestLogPayload payload)
+        public static HttpContent CreateHttpContent(LoggerContext logger, CreateRequestLogPayload payload, LogBeeSinkConfiguration config)
         {
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
 
             if (payload == null)
                 throw new ArgumentNullException(nameof(payload));
+
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
 
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
@@ -95,6 +98,9 @@ namespace Serilog.Sinks.LogBee
 
             foreach(var file in files)
             {
+                if (file.FileSize > config.MaximumAllowedFileSizeInBytes)
+                    continue;
+
                 if (!System.IO.File.Exists(file.FilePath))
                     continue;
 
