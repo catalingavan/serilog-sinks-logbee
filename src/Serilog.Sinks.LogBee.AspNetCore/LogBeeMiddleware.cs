@@ -45,6 +45,11 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 if (responseStream != null)
                 {
                     httpContextLogger.ResponseContentLength = responseStream.MirrorStream.Length;
+
+                    string? responseBody = InternalHelpers.ReadStreamAsString(responseStream.MirrorStream, responseStream.Encoding);
+                    if (!string.IsNullOrEmpty(responseBody))
+                        httpContextLogger.Logger.LogAsFile(responseBody, "Response.txt");
+
                     responseStream.MirrorStream.Dispose();
                 }
 
@@ -55,6 +60,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                         await httpContextLogger.Logger.FlushAsync().ConfigureAwait(false);
                     });
                 }
+
+                httpContextLogger.Logger.Dispose();
             }
         }
 

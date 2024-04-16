@@ -175,5 +175,20 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
             return null;
         }
+
+        public static string? ReadStreamAsString(Stream stream, Encoding encoding)
+        {
+            if (stream == null || !stream.CanRead)
+                return null;
+
+            string? content = null;
+            using (StreamReader reader = new StreamReader(stream, encoding, true))
+            {
+                stream.Position = 0;
+                content = reader.ReadToEnd();
+            }
+
+            return content;
+        }
     }
 }

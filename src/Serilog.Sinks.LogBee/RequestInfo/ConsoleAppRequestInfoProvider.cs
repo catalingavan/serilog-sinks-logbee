@@ -5,6 +5,7 @@
         private readonly DateTime _startedAt;
         private RequestProperties _requestProperties;
         private ResponseProperties _responseProperties;
+        private readonly List<FileLog> _files;
         public ConsoleAppRequestInfoProvider(
             string url = "http://application",
             string httpMethod = "GET")
@@ -22,6 +23,7 @@
             _startedAt = DateTime.UtcNow;
             _requestProperties = new(absoluteUri, httpMethod);
             _responseProperties = new ResponseProperties(200);
+            _files = new();
         }
 
         public DateTime GetStartedAt() => _startedAt;
@@ -36,6 +38,19 @@
         public void SetResponse(ResponseProperties responseProperties)
         {
             _responseProperties = responseProperties ?? throw new ArgumentNullException(nameof(responseProperties));
+        }
+
+        public void LogAsFile(string contents, string? fileName = null)
+        {
+            FileLog? file = FileLog.Create(contents, fileName, 5 * 1024 * 1024);
+            if (file != null)
+                _files.Add(file);
+        }
+
+        public void Dispose()
+        {
+            foreach (var file in _files)
+                file.Dispose();
         }
     }
 }
