@@ -35,32 +35,13 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 Headers = ToDictionary(response.Headers)
             };
         }
-
-        public static string? GetMachineName()
-        {
-            string? name = null;
-
-            try
-            {
-                name =
-                    Environment.GetEnvironmentVariable("CUMPUTERNAME") ??
-                    Environment.GetEnvironmentVariable("HOSTNAME") ??
-                    System.Net.Dns.GetHostName();
-            }
-            catch
-            {
-                // ignored
-            }
-
-            return name;
-        }
         
         public static string GetDisplayUrl(HttpRequest request)
         {
             string value = request.Host.Value;
-            string value2 = request.PathBase.Value;
-            string value3 = request.Path.Value;
-            string value4 = request.QueryString.Value;
+            string value2 = request.PathBase.Value ?? string.Empty;
+            string value3 = request.Path.Value ?? string.Empty;
+            string value4 = request.QueryString.Value ?? string.Empty;
             return new StringBuilder(request.Scheme.Length + "://".Length + value.Length + value2.Length + value3.Length + value4.Length).Append(request.Scheme).Append("://").Append(value)
                 .Append(value2)
                 .Append(value3)
@@ -80,7 +61,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 if (string.IsNullOrWhiteSpace(key))
                     continue;
                 
-                string value = collection[key];
+                string value = collection[key] ?? string.Empty;
                 result.TryAdd(key, value);
             }
 
@@ -99,7 +80,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 if (string.IsNullOrWhiteSpace(key))
                     continue;
 
-                string value = collection[key];
+                string value = collection[key].ToString();
                 result.TryAdd(key, value);
             }
 
@@ -118,7 +99,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 if (string.IsNullOrWhiteSpace(key))
                     continue;
 
-                string value = collection[key];
+                string value = collection[key].ToString();
                 result.TryAdd(key, value);
             }
 
@@ -137,7 +118,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 if (string.IsNullOrWhiteSpace(key))
                     continue;
 
-                string value = collection[key];
+                string value = collection[key].ToString();
                 result.TryAdd(key, value);
             }
 

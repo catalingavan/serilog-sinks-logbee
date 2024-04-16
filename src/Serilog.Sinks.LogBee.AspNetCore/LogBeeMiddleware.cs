@@ -14,18 +14,25 @@ namespace Serilog.Sinks.LogBee.AspNetCore
         public async Task InvokeAsync(HttpContext context)
         {
             HttpContextLogger? httpContextLogger = InternalHelpers.GetHttpContextLogger(context);
-
-            if(httpContextLogger != null)
+            if (httpContextLogger == null)
             {
-                if (InternalHelpers.ShouldReadInputStream(context.Request.Headers, httpContextLogger.Config) &&
-                    httpContextLogger.Config.ShouldReadRequestBody(context.Request))
+                await _next(context);
+                return;
+            }
+
+            if (context.Response.Body != null && context.Response.Body is MirrorStreamDecorator == false)
+            {
+                context.Response.Body = new MirrorStreamDecorator(context.Response.Body);
+            }
+
+            if (InternalHelpers.ShouldReadInputStream(context.Request.Headers, httpContextLogger.Config) &&
+                httpContextLogger.Config.ShouldReadRequestBody(context.Request))
+            {
+                httpContextLogger.RequestBody = InternalHelpers.WrapInTryCatch(() =>
                 {
-                    httpContextLogger.RequestBody = InternalHelpers.WrapInTryCatch(() =>
-                    {
-                        var provider = new ReadInputStreamProvider();
-                        return provider.ReadInputStream(context.Request);
-                    });
-                }
+                    var provider = new ReadInputStreamProvider();
+                    return provider.ReadInputStream(context.Request);
+                });
             }
 
             try
@@ -34,7 +41,14 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             }
             finally
             {
-                if (httpContextLogger != null && httpContextLogger.Config.ShouldLogRequest(context))
+                MirrorStreamDecorator? responseStream = GetResponseStream(context.Response);
+                if (responseStream != null)
+                {
+                    httpContextLogger.ResponseContentLength = responseStream.MirrorStream.Length;
+                    responseStream.MirrorStream.Dispose();
+                }
+
+                if (httpContextLogger.Config?.ShouldLogRequest(context) == true)
                 {
                     await InternalHelpers.WrapInTryCatchAsync(async () =>
                     {
@@ -42,6 +56,19 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                     });
                 }
             }
+        }
+
+        private MirrorStreamDecorator? GetResponseStream(HttpResponse response)
+        {
+            if (response.Body != null && response.Body is MirrorStreamDecorator stream)
+            {
+                if (!stream.MirrorStream.CanRead)
+                    return null;
+
+                return stream;
+            }
+
+            return null;
         }
     }
 

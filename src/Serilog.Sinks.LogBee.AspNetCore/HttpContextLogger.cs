@@ -5,6 +5,7 @@
         public Logger Logger { get; init; }
         public LogBeeSinkAspNetCoreConfiguration Config { get; init; }
         public string? RequestBody { get; set; }
+        public long? ResponseContentLength { get; set; }
 
         public HttpContextLogger(
             Logger logger,

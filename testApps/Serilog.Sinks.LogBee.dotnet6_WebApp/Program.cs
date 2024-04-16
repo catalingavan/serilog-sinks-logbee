@@ -17,15 +17,7 @@ builder.Services.AddSerilog((services, lc) => lc
             "c13a9c8e-6592-4693-a041-d13ccd31b5d8",
             "http://localhost:5265/"
         ),
-        services,
-        config =>
-        {
-            config.ShouldLogRequest = (req) =>
-            {
-                var a = req.Request.Path.ToUriComponent();
-                return a != "/";
-            };
-        }
+        services
     ));
 
 var app = builder.Build();

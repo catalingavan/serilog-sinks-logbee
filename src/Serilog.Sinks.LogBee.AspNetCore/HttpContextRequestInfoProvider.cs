@@ -15,6 +15,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
         }
 
         public DateTime GetStartedAt() => _startedAt;
+        public string? GetMachineName() => Serilog.Sinks.LogBee.InternalHelpers.GetMachineName();
         public RequestProperties GetRequestProperties()
         {
             var result = InternalHelpers.Create(_httpContext.Request);
@@ -23,6 +24,14 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
             return result;
         }
-        public ResponseProperties GetResponseProperties() => InternalHelpers.Create(_httpContext.Response);
+        public ResponseProperties GetResponseProperties()
+        {
+            var result = InternalHelpers.Create(_httpContext.Response);
+            HttpContextLogger? httpContextLogger = InternalHelpers.GetHttpContextLogger(_httpContext);
+            if (httpContextLogger?.ResponseContentLength != null)
+                result.ContentLength = httpContextLogger.ResponseContentLength.Value;
+
+            return result;
+        }
     }
 }

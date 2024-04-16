@@ -25,6 +25,7 @@
         }
 
         public DateTime GetStartedAt() => _startedAt;
+        public string? GetMachineName() => InternalHelpers.GetMachineName();
         public RequestProperties GetRequestProperties() => _requestProperties;
         public ResponseProperties GetResponseProperties() => _responseProperties;
 

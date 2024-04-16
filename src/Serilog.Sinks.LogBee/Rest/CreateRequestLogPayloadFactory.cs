@@ -32,6 +32,7 @@ namespace Serilog.Sinks.LogBee.Rest
                     Name = "Serilog.Sinks.LogBee",
                     Version = "0.0.1"
                 },
+                MachineName = requestInfoProvider.GetMachineName(),
                 HttpProperties = new CreateRequestLogPayload.HttpPropertiesPayload
                 {
                     AbsoluteUri = request.AbsoluteUri.ToString(),
