@@ -1,9 +1,8 @@
 ﻿namespace Serilog.Sinks.LogBee.Context
 {
-    public class ConsoleAppContextProvider : IContextProvider
+    public class ConsoleAppContextProvider : ContextProvider
     {
         private readonly DateTime _startedAt;
-        private readonly List<LoggedFile> _loggedFiles;
         private RequestProperties _requestProperties;
         private ResponseProperties _responseProperties;
         public ConsoleAppContextProvider(
@@ -23,13 +22,11 @@
             _startedAt = DateTime.UtcNow;
             _requestProperties = new RequestProperties(absoluteUri, httpMethod);
             _responseProperties = new(200);
-            _loggedFiles = new();
         }
 
-        public DateTime GetStartedAt() => _startedAt;
-        public RequestProperties GetRequestProperties() => _requestProperties;
-        public ResponseProperties GetResponseProperties() => _responseProperties;
-        public List<LoggedFile> GetLoggedFiles() => _loggedFiles;
+        public override DateTime GetStartedAt() => _startedAt;
+        public override RequestProperties GetRequestProperties() => _requestProperties;
+        public override ResponseProperties GetResponseProperties() => _responseProperties;
         public void SetRequest(RequestProperties requestProperties)
         {
             _requestProperties = requestProperties ?? throw new ArgumentNullException(nameof(requestProperties));
@@ -37,19 +34,6 @@
         public void SetResponse(ResponseProperties responseProperties)
         {
             _responseProperties = responseProperties ?? throw new ArgumentNullException(nameof(responseProperties));
-        }
-        public void LogFile(LoggedFile file)
-        {
-            if (file == null)
-                throw new ArgumentNullException(nameof(file));
-
-            _loggedFiles.Add(file);
-        }
-
-        public void Dispose()
-        {
-            foreach (var file in _loggedFiles)
-                file.Dispose();
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Serilog.Sinks.LogBee.RequestInfo;
-using Serilog.Sinks.LogBee.Rest;
+﻿using Serilog.Sinks.LogBee.Rest;
 using System.Text;
 using System.Text.Json;
 
@@ -26,28 +25,68 @@ namespace Serilog.Sinks.LogBee
             return name;
         }
 
-        public static HttpContent CreateHttpContent(
-            IRequestInfoProvider requestInfoProvider,
-            LogBeeApiKey apiKey,
-            List<CreateRequestLogPayload.LogMessagePayload> logs,
-            List<CreateRequestLogPayload.ExceptionPayload> exceptions)
+        public static CreateRequestLogPayload CreateRequestLogPayload(LoggerContext logger)
         {
-            if (requestInfoProvider == null)
-                throw new ArgumentNullException(nameof(requestInfoProvider));
+            if (logger == null)
+                throw new ArgumentNullException(nameof(logger));
 
-            if (apiKey == null)
-                throw new ArgumentNullException(nameof(apiKey));
+            var contextProvider = logger.GetContextProvider();
+            var logBeeApiKey = logger.GetLogBeeApiKey();
 
-            if (logs == null)
-                throw new ArgumentNullException(nameof(logs));
+            DateTime startedAt = contextProvider.GetStartedAt();
+            var request = contextProvider.GetRequestProperties();
+            var response = contextProvider.GetResponseProperties();
+            int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - startedAt).TotalMilliseconds)));
 
-            if (exceptions == null)
-                throw new ArgumentNullException(nameof(exceptions));
+            CreateRequestLogPayload payload = new CreateRequestLogPayload
+            {
+                StartedAt = startedAt,
+                OrganizationId = logBeeApiKey.OrganizationId,
+                ApplicationId = logBeeApiKey.ApplicationId,
+                DurationInMilliseconds = duration,
+                IntegrationClient = new CreateRequestLogPayload.IntegrationClientPayload
+                {
+                    Name = "Serilog.Sinks.LogBee",
+                    Version = "0.0.1"
+                },
+                MachineName = GetMachineName(),
+                HttpProperties = new CreateRequestLogPayload.HttpPropertiesPayload
+                {
+                    AbsoluteUri = request.AbsoluteUri.ToString(),
+                    Method = request.Method,
+                    Request = new CreateRequestLogPayload.HttpPropertiesPayload.RequestPropertiesPayload
+                    {
+                        Headers = request.Headers,
+                        FormData = request.FormData,
+                        Claims = request.Claims,
+                        Cookies = request.Cookies,
+                        InputStream = request.RequestBody
+                    },
+                    Response = new CreateRequestLogPayload.HttpPropertiesPayload.ResponsePropertiesPayload
+                    {
+                        StatusCode = response.StatusCode,
+                        ContentLength = response.ContentLength ?? 0,
+                        Headers = response.Headers
+                    }
+                },
+                Logs = logger.GetLogs(),
+                Exceptions = logger.GetExceptions()
+            };
 
-            var payload = CreateRequestLogPayloadFactory.Create(requestInfoProvider, apiKey, logs, exceptions);
+            return payload;
+        }
+
+        public static HttpContent CreateHttpContent(LoggerContext logger, CreateRequestLogPayload payload)
+        {
+            if (logger == null)
+                throw new ArgumentNullException(nameof(logger));
+
+            if (payload == null)
+                throw new ArgumentNullException(nameof(payload));
+
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-            var files = requestInfoProvider.GetFiles();
+            var files = logger.GetContextProvider().GetLoggedFiles();
             if (!files.Any())
                 return content;
 
@@ -63,6 +102,21 @@ namespace Serilog.Sinks.LogBee
             }
 
             return form;
+        }
+
+        public static void WrapInTryCatch(Action fn)
+        {
+            if (fn == null)
+                throw new ArgumentNullException(nameof(fn));
+
+            try
+            {
+                fn.Invoke();
+            }
+            catch (Exception)
+            {
+                // ignore
+            }
         }
     }
 }

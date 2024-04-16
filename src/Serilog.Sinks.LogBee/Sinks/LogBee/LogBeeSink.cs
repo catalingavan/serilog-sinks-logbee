@@ -1,29 +1,28 @@
 ﻿using Serilog.Core;
 using Serilog.Events;
-using Serilog.Sinks.LogBee.RequestInfo;
+using Serilog.Sinks.LogBee.Context;
 
 namespace Serilog.Sinks.LogBee;
 
 internal class LogBeeSink : ILogEventSink, IDisposable
 {
-    private readonly Logger _logger;
-    private readonly IRequestInfoProvider _requestInfoProvider;
+    private readonly LoggerContext _loggerContext;
     public LogBeeSink(
         LogBeeApiKey apiKey,
-        IRequestInfoProvider requestInfoProvider)
+        ContextProvider contextProvider)
     {
-        _logger = new Logger(apiKey, requestInfoProvider);
-        _requestInfoProvider = requestInfoProvider ?? throw new ArgumentNullException(nameof(requestInfoProvider));
+        _loggerContext = new LoggerContext(contextProvider, apiKey);
     }
 
     public void Emit(LogEvent logEvent)
     {
-        _logger.Emit(logEvent);
+        _loggerContext.Emit(logEvent);
     }
 
     public void Dispose()
     {
-        _logger.Flush();
-        _requestInfoProvider.Dispose();
+        InternalHelpers.WrapInTryCatch(() => _loggerContext.Flush());
+        
+        _loggerContext.Dispose();
     }
 }

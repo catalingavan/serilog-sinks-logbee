@@ -1,33 +1,31 @@
 ﻿using Serilog.Events;
-using Serilog.Sinks.LogBee.RequestInfo;
+using Serilog.Sinks.LogBee.Context;
 using Serilog.Sinks.LogBee.Rest;
 
 namespace Serilog.Sinks.LogBee
 {
-    internal class Logger
+    internal class LoggerContext : IDisposable
     {
-        private readonly IRequestInfoProvider _requestInfoProvider;
+        private readonly ContextProvider _contextProvider;
         private readonly LogBeeApiKey _apiKey;
         private readonly List<CreateRequestLogPayload.LogMessagePayload> _logs;
         private readonly List<CreateRequestLogPayload.ExceptionPayload> _exceptions;
-        public Logger(
-            LogBeeApiKey apiKey,
-            IRequestInfoProvider requestInfoProvider)
+        public LoggerContext(
+            ContextProvider contextProvider,
+            LogBeeApiKey apiKey)
         {
+            _contextProvider = contextProvider ?? throw new ArgumentNullException(nameof(contextProvider));
             _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
-            _requestInfoProvider = requestInfoProvider ?? throw new ArgumentNullException(nameof(requestInfoProvider));
             _logs = new();
             _exceptions = new();
         }
-
-        public IRequestInfoProvider RequestInfoProvider => _requestInfoProvider;
 
         public void Emit(LogEvent logEvent)
         {
             if (logEvent == null)
                 return;
 
-            DateTime startedAt = _requestInfoProvider.GetStartedAt();
+            DateTime startedAt = _contextProvider.GetStartedAt();
             int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - startedAt).TotalMilliseconds)));
 
             _logs.Add(new CreateRequestLogPayload.LogMessagePayload
@@ -48,30 +46,32 @@ namespace Serilog.Sinks.LogBee
             }
         }
 
+        public List<CreateRequestLogPayload.LogMessagePayload> GetLogs() => _logs.ToList();
+        public List<CreateRequestLogPayload.ExceptionPayload> GetExceptions() => _exceptions.ToList();
+        public ContextProvider GetContextProvider() => _contextProvider;
+        public LogBeeApiKey GetLogBeeApiKey() => _apiKey;
+
         public void Flush()
         {
-            var content = InternalHelpers.CreateHttpContent(
-                _requestInfoProvider,
-                _apiKey,
-                _logs,
-                _exceptions
-            );
+            var payload = InternalHelpers.CreateRequestLogPayload(this);
+            var httpContent = InternalHelpers.CreateHttpContent(this, payload);
 
             var client = new LogBeeRestClient(_apiKey);
-            client.CreateRequestLog(content);
+            client.CreateRequestLog(httpContent);
         }
 
         public async Task FlushAsync()
         {
-            var content = InternalHelpers.CreateHttpContent(
-                _requestInfoProvider,
-                _apiKey,
-                _logs,
-                _exceptions
-            );
+            var payload = InternalHelpers.CreateRequestLogPayload(this);
+            var httpContent = InternalHelpers.CreateHttpContent(this, payload);
 
             var client = new LogBeeRestClient(_apiKey);
-            await client.CreateRequestLogAsync(content).ConfigureAwait(false);
+            await client.CreateRequestLogAsync(httpContent).ConfigureAwait(false);
+        }
+
+        public void Dispose()
+        {
+            _contextProvider.Dispose();
         }
     }
 }
