@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Serilog.Sinks.LogBee.RequestInfo;
+using Serilog.Sinks.LogBee.Context;
 using System.Text;
 
 namespace Serilog.Sinks.LogBee.AspNetCore
 {
-    internal static class InternalHelpers
+    internal static class AspNetCoreHelpers
     {
         public static RequestProperties Create(HttpRequest request)
         {
@@ -136,42 +136,10 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             return config.ReadRequestBodyContentTypes?.Any(p => contentType.Contains(p)) == true;
         }
 
-        public static T? WrapInTryCatch<T>(Func<T> fn)
+        public static HttpLoggerContainer? GetHttpLoggerContainer(HttpContext context)
         {
-            if (fn == null)
-                throw new ArgumentNullException(nameof(fn));
-
-            try
-            {
-                return fn.Invoke();
-            }
-            catch (Exception)
-            {
-                // ignore
-            }
-
-            return default;
-        }
-
-        public static async Task WrapInTryCatchAsync(Func<Task> fn)
-        {
-            if (fn == null)
-                throw new ArgumentNullException(nameof(fn));
-
-            try
-            {
-                await fn.Invoke();
-            }
-            catch (Exception)
-            {
-                // ignore
-            }
-        }
-
-        public static HttpContextLogger? GetHttpContextLogger(HttpContext context)
-        {
-            if (context.Items.TryGetValue(LogBeeSink.HTTP_CONTEXT_LOGGER, out var value))
-                return value as HttpContextLogger;
+            if (context.Items.TryGetValue(Constants.HTTP_CONTEXT_LOGGER_CONTAINER, out var value))
+                return value as HttpLoggerContainer;
 
             return null;
         }

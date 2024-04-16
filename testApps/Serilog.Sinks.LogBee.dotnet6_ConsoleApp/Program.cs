@@ -19,7 +19,6 @@ Log.Logger =
             (config) =>
             {
                 config.MaximumAllowedFileSizeInBytes = 5;
-                config.True = false;
             }
         )
         .CreateLogger();

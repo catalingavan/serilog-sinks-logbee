@@ -6,8 +6,6 @@ namespace Serilog.Sinks.LogBee.AspNetCore;
 
 internal class LogBeeSink : ILogEventSink
 {
-    public const string HTTP_CONTEXT_LOGGER = "Serilog.LogBee.Logger";
-
     private readonly LogBeeApiKey _apiKey;
     private readonly IServiceProvider _serviceProvider;
     private readonly LogBeeSinkAspNetCoreConfiguration _config;
@@ -27,22 +25,26 @@ internal class LogBeeSink : ILogEventSink
             throw new ArgumentNullException(nameof(logEvent));
 
         var httpContextAccessor = _serviceProvider.GetService(typeof(IHttpContextAccessor)) as IHttpContextAccessor;
-        if (httpContextAccessor == null || httpContextAccessor.HttpContext == null)
+        if (httpContextAccessor == null)
             return;
 
-        HttpContextLogger httpContextLogger;
-        if (httpContextAccessor.HttpContext.Items.ContainsKey(HTTP_CONTEXT_LOGGER))
-        {
-            httpContextLogger = (httpContextAccessor.HttpContext.Items[HTTP_CONTEXT_LOGGER] as HttpContextLogger)!;
-        }
-        else
-        {
-            var logger = new Logger(_apiKey, new HttpContextRequestInfoProvider(httpContextAccessor.HttpContext));
-            httpContextLogger = new HttpContextLogger(logger, _config);
+        var httpContext = httpContextAccessor.HttpContext;
+        if (httpContext == null)
+            return;
 
-            httpContextAccessor.HttpContext.Items.Add(HTTP_CONTEXT_LOGGER, httpContextLogger);
+        HttpLoggerContainer? httpLoggerContainer = AspNetCoreHelpers.GetHttpLoggerContainer(httpContext);
+        if (httpLoggerContainer == null)
+        {
+            var loggerContext = new LoggerContext(
+                new HttpContextProvider(httpContext),
+                _apiKey,
+                _config
+            );
+            httpLoggerContainer = new HttpLoggerContainer(loggerContext, _config);
+
+            httpContext.Items.Add(Constants.HTTP_LOGGER_CONTAINER, httpLoggerContainer);
         }
 
-        httpContextLogger.Logger.Emit(logEvent);
+        httpLoggerContainer.LoggerContext.Emit(logEvent);
     }
 }

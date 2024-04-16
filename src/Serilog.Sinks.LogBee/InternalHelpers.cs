@@ -124,5 +124,37 @@ namespace Serilog.Sinks.LogBee
                 // ignore
             }
         }
+
+        public static T? WrapInTryCatch<T>(Func<T> fn)
+        {
+            if (fn == null)
+                throw new ArgumentNullException(nameof(fn));
+
+            try
+            {
+                return fn.Invoke();
+            }
+            catch (Exception)
+            {
+                // ignore
+            }
+
+            return default;
+        }
+
+        public static async Task WrapInTryCatchAsync(Func<Task> fn)
+        {
+            if (fn == null)
+                throw new ArgumentNullException(nameof(fn));
+
+            try
+            {
+                await fn.Invoke();
+            }
+            catch (Exception)
+            {
+                // ignore
+            }
+        }
     }
 }
