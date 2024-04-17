@@ -2,27 +2,30 @@
 {
     public class LogBeeApiKey
     {
-        public string OrganizationId { get; init; }
-        public string ApplicationId { get; init; }
-        public Uri LogBeeUri { get; init; }
+        internal bool IsValid { get; init; }
+
+        public string OrganizationId { get; init; } = default!;
+        public string ApplicationId { get; init; } = default!;
+        public Uri LogBeeUri { get; init; } = default!;
 
         public LogBeeApiKey(string organizationId, string applicationId, string logBeeEndpoint)
         {
             if (string.IsNullOrWhiteSpace(organizationId))
-                throw new ArgumentNullException(nameof(organizationId));
+                return;
 
             if (string.IsNullOrWhiteSpace(applicationId))
-                throw new ArgumentNullException(nameof(applicationId));
+                return;
 
             if (string.IsNullOrWhiteSpace(logBeeEndpoint))
-                throw new ArgumentNullException(nameof(logBeeEndpoint));
+                return;
 
             if (!Uri.TryCreate(logBeeEndpoint, UriKind.Absolute, out var logBeeUri))
-                throw new ArgumentException($"{nameof(logBeeEndpoint)} must be an absolute URI");
+                return;
 
             OrganizationId = organizationId;
             ApplicationId = applicationId;
             LogBeeUri = logBeeUri;
+            IsValid = true;
         }
     }
 }

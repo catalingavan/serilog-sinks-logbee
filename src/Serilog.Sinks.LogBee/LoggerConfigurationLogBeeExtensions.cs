@@ -32,6 +32,11 @@ public static class LoggerConfigurationLogBeeExtensions
         if (apiKey == null)
             throw new ArgumentNullException(nameof(apiKey));
 
+        if(!apiKey.IsValid)
+        {
+            return loggerConfiguration.Sink(new NullLogBeeSink());
+        }
+
         var config = new LogBeeSinkConfiguration();
         configAction?.Invoke(config);
 

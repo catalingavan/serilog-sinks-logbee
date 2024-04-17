@@ -26,11 +26,19 @@ public static class LoggerConfigurationLogBeeExtensions
         if (loggerConfiguration == null)
             throw new ArgumentNullException(nameof(loggerConfiguration));
 
+        if (apiKey == null)
+            throw new ArgumentNullException(nameof(apiKey));
+
         if (serviceProvider == null)
             throw new ArgumentNullException(nameof(serviceProvider));
 
         if (configAction == null)
             throw new ArgumentNullException(nameof(configAction));
+
+        if (!apiKey.IsValid)
+        {
+            return loggerConfiguration.Sink(new NullLogBeeSink());
+        }
 
         var config = new LogBeeSinkAspNetCoreConfiguration();
         configAction(config);
