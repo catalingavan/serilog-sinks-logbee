@@ -1,10 +1,22 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Serilog.Sinks.LogBee.Context;
+using System.Reflection;
 using System.Text;
 
 namespace Serilog.Sinks.LogBee.AspNetCore
 {
     internal static class AspNetCoreHelpers
     {
+        public static readonly Lazy<IntegrationClient> IntegrationClient =
+            new Lazy<IntegrationClient>(() =>
+            {
+                AssemblyName assembly = typeof(AspNetCoreHelpers).Assembly.GetName();
+                string name = assembly.Name ?? assembly.FullName;
+                Version version = assembly.Version ?? new Version(0, 0, 1);
+
+                return new IntegrationClient(name, version);
+            });
+
         public static bool CanReadRequestBody(IHeaderDictionary requestHeaders, LogBeeSinkAspNetCoreConfiguration config)
         {
             string? contentType = requestHeaders?.FirstOrDefault(p => string.Compare(p.Key, "Content-Type", StringComparison.OrdinalIgnoreCase) == 0).Value;

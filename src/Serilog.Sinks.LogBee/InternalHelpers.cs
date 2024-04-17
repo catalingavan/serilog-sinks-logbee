@@ -1,4 +1,6 @@
-﻿using Serilog.Sinks.LogBee.Rest;
+﻿using Serilog.Sinks.LogBee.Context;
+using Serilog.Sinks.LogBee.Rest;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 
@@ -6,6 +8,16 @@ namespace Serilog.Sinks.LogBee
 {
     internal static class InternalHelpers
     {
+        public static readonly Lazy<IntegrationClient> IntegrationClient =
+            new Lazy<IntegrationClient>(() =>
+            {
+                AssemblyName assembly = typeof(InternalHelpers).Assembly.GetName();
+                string name = assembly.Name ?? assembly.FullName;
+                Version version = assembly.Version ?? new Version(0, 0, 1);
+
+                return new IntegrationClient(name, version);
+            });
+
         public static string? GetMachineName()
         {
             string? name = null;
@@ -38,6 +50,9 @@ namespace Serilog.Sinks.LogBee
             var response = contextProvider.GetResponseProperties();
             int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - startedAt).TotalMilliseconds)));
 
+            var authenticatedUser = contextProvider.GetAuthenticatedUser();
+            var integrationClient = contextProvider.GetIntegrationClient();
+
             CreateRequestLogPayload payload = new CreateRequestLogPayload
             {
                 StartedAt = startedAt,
@@ -46,10 +61,14 @@ namespace Serilog.Sinks.LogBee
                 DurationInMilliseconds = duration,
                 IntegrationClient = new CreateRequestLogPayload.IntegrationClientPayload
                 {
-                    Name = "Serilog.Sinks.LogBee",
-                    Version = "0.0.1"
+                    Name = integrationClient.Name,
+                    Version = integrationClient.Version.ToString()
                 },
                 MachineName = GetMachineName(),
+                User = authenticatedUser == null ? null : new CreateRequestLogPayload.UserPayload
+                {
+                    Name = authenticatedUser.Name
+                },
                 HttpProperties = new CreateRequestLogPayload.HttpPropertiesPayload
                 {
                     AbsoluteUri = request.AbsoluteUri.ToString(),

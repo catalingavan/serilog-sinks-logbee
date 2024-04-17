@@ -58,6 +58,18 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
             return result;
         }
+        public override AuthenticatedUser? GetAuthenticatedUser()
+        {
+            if (_httpContext.User.Identity is ClaimsIdentity claimsIdentity == false)
+                return null;
+
+            string? name = claimsIdentity.Claims.FirstOrDefault(p => _config.UserNameClaims.Any(q => string.Equals(p.Type, q, StringComparison.OrdinalIgnoreCase)))?.Value;
+            if (string.IsNullOrWhiteSpace(name))
+                return null;
+
+            return new AuthenticatedUser(name);
+        }
+        public override IntegrationClient GetIntegrationClient() => AspNetCoreHelpers.IntegrationClient.Value;
 
         private string GetDisplayUrl(HttpRequest request)
         {

@@ -15,6 +15,8 @@ namespace Serilog.Sinks.LogBee.Context
         public abstract DateTime GetStartedAt();
         public abstract RequestProperties GetRequestProperties();
         public abstract ResponseProperties GetResponseProperties();
+        public abstract AuthenticatedUser? GetAuthenticatedUser();
+        public virtual IntegrationClient GetIntegrationClient() => InternalHelpers.IntegrationClient.Value;
         public List<LoggedFile> GetLoggedFiles() => _loggedFiles.ToList();
 
         public void LogAsFile(string contents, string? fileName = null)

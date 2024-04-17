@@ -8,7 +8,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
     {
         public string[] ReadRequestBodyContentTypes { get; set; } = new[] { "application/javascript", "application/json", "application/xml", "text/plain", "text/xml", "text/html" };
         public string[] ReadResponseBodyContentTypes { get; set; } = new[] { "application/json" };
-        
+        public string[] UserNameClaims { get; set; } = new[] { ClaimTypes.Name, ClaimTypes.GivenName, ClaimTypes.Surname, ClaimTypes.Email, "name", "username", "email", "emailaddress" };
+
         public Func<HttpRequest, bool> ShouldReadRequestBody { get; set; } = (request) => true;
         public Func<HttpContext, bool> ShouldReadResponseBody { get; set; } = (context) => true;
         public Func<HttpRequest, KeyValuePair<string, StringValues>, bool> ShouldReadFormData { get; set; } = (request, formData) => true;
