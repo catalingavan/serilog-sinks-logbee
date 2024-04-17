@@ -7,11 +7,14 @@ namespace Serilog.Sinks.LogBee.AspNetCore
     internal class HttpContextProvider : ContextProvider
     {
         private readonly HttpContext _httpContext;
+        private readonly LogBeeSinkAspNetCoreConfiguration _config;
         private readonly DateTime _startedAt;
         public HttpContextProvider(
-            HttpContext httpContext)
+            HttpContext httpContext,
+            LogBeeSinkAspNetCoreConfiguration config)
         {
             _httpContext = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
             _startedAt = DateTime.UtcNow;
         }
 
@@ -23,12 +26,12 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
             var result = new RequestProperties(requestUri, request.Method)
             {
-                Headers = ToDictionary(request.Headers),
-                Cookies = ToDictionary(request.Cookies),
+                Headers = ReadRequestHeaders(request, request.Headers),
+                Cookies = ReadRequestCookies(request, request.Cookies),
             };
 
             if (request.HasFormContentType)
-                result.FormData = ToDictionary(request.Form);
+                result.FormData = ReadRequestFormData(request, request.Form);
 
             HttpLoggerContainer? loggerContainer = AspNetCoreHelpers.GetHttpLoggerContainer(_httpContext);
             if (loggerContainer != null)
@@ -65,58 +68,69 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 .ToString();
         }
 
-        private Dictionary<string, string> ToDictionary(IRequestCookieCollection collection)
+        private Dictionary<string, string> ReadRequestCookies(HttpRequest request, IRequestCookieCollection collection)
         {
             if (collection == null)
                 return new Dictionary<string, string>();
 
             Dictionary<string, string> result = new Dictionary<string, string>();
 
-            foreach (string key in collection.Keys)
+            foreach (var keyValuePair in collection)
             {
+                string key = keyValuePair.Key;
                 if (string.IsNullOrWhiteSpace(key))
                     continue;
 
-                string value = collection[key] ?? string.Empty;
-                result.TryAdd(key, value);
+                if (_config.ShouldReadRequestCookie.Invoke(request, keyValuePair))
+                {
+                    result.TryAdd(key, keyValuePair.Value);
+                }
             }
 
             return result;
         }
 
-        private Dictionary<string, string> ToDictionary(IHeaderDictionary collection)
+        private Dictionary<string, string> ReadRequestHeaders(HttpRequest request, IHeaderDictionary collection)
         {
             if (collection == null)
                 return new Dictionary<string, string>();
 
             Dictionary<string, string> result = new Dictionary<string, string>();
 
-            foreach (string key in collection.Keys)
+            foreach (var keyValuePair in collection)
             {
+                string key = keyValuePair.Key;
                 if (string.IsNullOrWhiteSpace(key))
                     continue;
 
-                string value = collection[key].ToString();
-                result.TryAdd(key, value);
+                if (_config.ShouldReadRequestHeader.Invoke(request, keyValuePair))
+                {
+                    string value = keyValuePair.Value.ToString();
+                    result.TryAdd(key, value);
+                }
             }
 
             return result;
         }
 
-        private Dictionary<string, string> ToDictionary(IFormCollection collection)
+        private Dictionary<string, string> ReadRequestFormData(HttpRequest request, IFormCollection collection)
         {
             if (collection == null)
                 return new Dictionary<string, string>();
 
             Dictionary<string, string> result = new Dictionary<string, string>();
 
-            foreach (string key in collection.Keys)
+            foreach (var keyValuePair in collection)
             {
+                string key = keyValuePair.Key;
                 if (string.IsNullOrWhiteSpace(key))
                     continue;
 
-                string value = collection[key].ToString();
-                result.TryAdd(key, value);
+                if(_config.ShouldReadFormData.Invoke(request, keyValuePair))
+                {
+                    string value = keyValuePair.Value.ToString();
+                    result.TryAdd(key, value);
+                }
             }
 
             return result;

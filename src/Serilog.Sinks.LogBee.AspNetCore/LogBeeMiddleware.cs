@@ -13,8 +13,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
         public async Task InvokeAsync(HttpContext context)
         {
-            HttpLoggerContainer? httpLoggerContainer = AspNetCoreHelpers.GetHttpLoggerContainer(context);
-            if (httpLoggerContainer == null)
+            HttpLoggerContainer? loggerContainer = AspNetCoreHelpers.GetHttpLoggerContainer(context);
+            if (loggerContainer == null)
             {
                 await _next(context);
                 return;
@@ -23,15 +23,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             if (context.Response.Body != null && context.Response.Body is MirrorStreamDecorator == false)
                 context.Response.Body = new MirrorStreamDecorator(context.Response.Body);
 
-            if (AspNetCoreHelpers.CanReadRequestBody(context.Request.Headers, httpLoggerContainer.Config) &&
-                httpLoggerContainer.Config.ShouldReadRequestBody(context.Request))
-            {
-                httpLoggerContainer.RequestBody = Serilog.Sinks.LogBee.InternalHelpers.WrapInTryCatch(() =>
-                {
-                    var provider = new ReadInputStreamProvider();
-                    return provider.ReadInputStream(context.Request);
-                });
-            }
+            TryReadRequestBody(context, loggerContainer);
 
             try
             {
@@ -39,45 +31,53 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             }
             finally
             {
-                MirrorStreamDecorator? responseStream = GetResponseStream(context.Response);
-                if (responseStream != null)
-                {
-                    httpLoggerContainer.ResponseContentLength = responseStream.MirrorStream.Length;
-
-                    string? responseBody = AspNetCoreHelpers.ReadStreamAsString(responseStream.MirrorStream, responseStream.Encoding);
-                    if (!string.IsNullOrEmpty(responseBody))
-                    {
-                        string fileName = AspNetCoreHelpers.GetResponseFileName(context.Response.Headers);
-                        httpLoggerContainer.LoggerContext.GetContextProvider().LogAsFile(responseBody, fileName);
-                    }
-
-                    responseStream.MirrorStream.Dispose();
-                }
+                TryLogResponseBody(context, loggerContainer);
 
                 await InternalHelpers.WrapInTryCatchAsync(async () =>
                 {
-                    await httpLoggerContainer.LoggerContext.FlushAsync().ConfigureAwait(false);
+                    await loggerContainer.LoggerContext.FlushAsync().ConfigureAwait(false);
                 });
 
-                httpLoggerContainer.Dispose();
+                loggerContainer.Dispose();
             }
         }
 
-        private void LogResponseBody(HttpContext context, HttpLoggerContainer loggerContainer)
+        private void TryReadRequestBody(HttpContext context, HttpLoggerContainer loggerContainer)
+        {
+            InternalHelpers.WrapInTryCatch(() =>
+            {
+                if (AspNetCoreHelpers.CanReadRequestBody(context.Request.Headers, loggerContainer.Config) &&
+                    loggerContainer.Config.ShouldReadRequestBody(context.Request))
+                {
+                    var provider = new ReadInputStreamProvider();
+                    loggerContainer.RequestBody = provider.ReadInputStream(context.Request);
+                }
+            });
+        }
+
+        private void TryLogResponseBody(HttpContext context, HttpLoggerContainer loggerContainer)
         {
             MirrorStreamDecorator? responseStream = GetResponseStream(context.Response);
             if (responseStream == null)
                 return;
 
-            string? responseBody = AspNetCoreHelpers.ReadStreamAsString(responseStream.MirrorStream, responseStream.Encoding);
-            if (!string.IsNullOrEmpty(responseBody))
+            InternalHelpers.WrapInTryCatch(() =>
             {
-                string fileName = AspNetCoreHelpers.GetResponseFileName(context.Response.Headers);
-                loggerContainer.LoggerContext.GetContextProvider().LogAsFile(responseBody, fileName);
-            }
+                if (AspNetCoreHelpers.CanReadResponseBody(context.Response.Headers, loggerContainer.Config) &&
+                    loggerContainer.Config.ShouldReadResponseBody(context))
+                {
+                    string? responseBody = AspNetCoreHelpers.ReadStreamAsString(responseStream.MirrorStream, responseStream.Encoding);
+                    if (!string.IsNullOrEmpty(responseBody))
+                    {
+                        string fileName = AspNetCoreHelpers.GetResponseFileName(context.Response.Headers);
+                        loggerContainer.LoggerContext.GetContextProvider().LogAsFile(responseBody, fileName);
+                    }
+                }
+            });
 
             responseStream.MirrorStream.Dispose();
         }
+
         private MirrorStreamDecorator? GetResponseStream(HttpResponse response)
         {
             if (response.Body != null && response.Body is MirrorStreamDecorator stream)

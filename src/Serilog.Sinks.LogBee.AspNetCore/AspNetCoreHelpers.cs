@@ -16,6 +16,17 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             return config.ReadRequestBodyContentTypes?.Any(p => contentType.Contains(p)) == true;
         }
 
+        public static bool CanReadResponseBody(IHeaderDictionary responseHeaders, LogBeeSinkAspNetCoreConfiguration config)
+        {
+            string? contentType = responseHeaders?.FirstOrDefault(p => string.Compare(p.Key, "Content-Type", StringComparison.OrdinalIgnoreCase) == 0).Value;
+            if (string.IsNullOrEmpty(contentType))
+                return false;
+
+            contentType = contentType.Trim().ToLowerInvariant();
+
+            return config.ReadResponseBodyContentTypes?.Any(p => contentType.Contains(p)) == true;
+        }
+
         public static HttpLoggerContainer? GetHttpLoggerContainer(HttpContext context)
         {
             if (context.Items.TryGetValue(Constants.HTTP_LOGGER_CONTAINER, out var value))
