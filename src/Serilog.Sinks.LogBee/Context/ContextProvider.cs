@@ -7,9 +7,11 @@ namespace Serilog.Sinks.LogBee.Context
         private static readonly Regex FILE_NAME_REGEX = new Regex(@"[^a-zA-Z0-9_\-\+\. ]+", RegexOptions.Compiled);
 
         private readonly List<LoggedFile> _loggedFiles;
+        private List<string> _keywords;
         public ContextProvider()
         {
             _loggedFiles = new();
+            _keywords = new();
         }
 
         public abstract DateTime GetStartedAt();
@@ -18,6 +20,7 @@ namespace Serilog.Sinks.LogBee.Context
         public abstract AuthenticatedUser? GetAuthenticatedUser();
         public virtual IntegrationClient GetIntegrationClient() => InternalHelpers.IntegrationClient.Value;
         public List<LoggedFile> GetLoggedFiles() => _loggedFiles.ToList();
+        public List<string> GetKeywords() => _keywords.ToList();
 
         public void LogAsFile(string contents, string? fileName = null)
         {
@@ -43,6 +46,11 @@ namespace Serilog.Sinks.LogBee.Context
                 if (temporaryFile != null)
                     temporaryFile.Dispose();
             }
+        }
+
+        public void SetKeywords(List<string> keywords)
+        {
+            _keywords = keywords ?? throw new ArgumentNullException(nameof(keywords));
         }
 
         public virtual void Dispose()

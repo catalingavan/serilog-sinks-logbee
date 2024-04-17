@@ -32,6 +32,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             finally
             {
                 TryLogResponseBody(context, loggerContainer);
+                TrySetKeywords(context, loggerContainer);
 
                 await InternalHelpers.WrapInTryCatchAsync(async () =>
                 {
@@ -76,6 +77,15 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             });
 
             responseStream.MirrorStream.Dispose();
+        }
+
+        private void TrySetKeywords(HttpContext context, HttpLoggerContainer loggerContainer)
+        {
+            InternalHelpers.WrapInTryCatch(() =>
+            {
+                var keywords = loggerContainer.Config.Keywords(context) ?? new();
+                loggerContainer.LoggerContext.GetContextProvider().SetKeywords(keywords);
+            });
         }
 
         private MirrorStreamDecorator? GetResponseStream(HttpResponse response)

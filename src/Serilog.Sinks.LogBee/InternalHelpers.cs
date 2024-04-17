@@ -90,7 +90,8 @@ namespace Serilog.Sinks.LogBee
                     }
                 },
                 Logs = logger.GetLogs(),
-                Exceptions = logger.GetExceptions()
+                Exceptions = logger.GetExceptions(),
+                Keywords = logger.GetContextProvider().GetKeywords()
             };
 
             return payload;

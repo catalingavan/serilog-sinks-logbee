@@ -17,6 +17,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
         public Func<HttpRequest, KeyValuePair<string, string>, bool> ShouldReadRequestCookie { get; set; } = (request, headerData) => true;
         public Func<HttpContext, KeyValuePair<string, StringValues>, bool> ShouldReadResponseHeader { get; set; } = (context, headerData) => true;
         public Func<HttpContext, Claim, bool> ShouldReadClaim { get; set; } = (context, claim) => true;
+        public Func<HttpContext, List<string>> Keywords { get; set; } = (context) => new();
         public Func<HttpContext, bool> ShouldLogRequest { get; set; } = (context) => true;
     }
 }
