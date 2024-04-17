@@ -23,7 +23,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             if (context.Response.Body != null && context.Response.Body is MirrorStreamDecorator == false)
                 context.Response.Body = new MirrorStreamDecorator(context.Response.Body);
 
-            if (AspNetCoreHelpers.ShouldReadInputStream(context.Request.Headers, httpLoggerContainer.Config) &&
+            if (AspNetCoreHelpers.CanReadRequestBody(context.Request.Headers, httpLoggerContainer.Config) &&
                 httpLoggerContainer.Config.ShouldReadRequestBody(context.Request))
             {
                 httpLoggerContainer.RequestBody = Serilog.Sinks.LogBee.InternalHelpers.WrapInTryCatch(() =>
@@ -63,6 +63,21 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             }
         }
 
+        private void LogResponseBody(HttpContext context, HttpLoggerContainer loggerContainer)
+        {
+            MirrorStreamDecorator? responseStream = GetResponseStream(context.Response);
+            if (responseStream == null)
+                return;
+
+            string? responseBody = AspNetCoreHelpers.ReadStreamAsString(responseStream.MirrorStream, responseStream.Encoding);
+            if (!string.IsNullOrEmpty(responseBody))
+            {
+                string fileName = AspNetCoreHelpers.GetResponseFileName(context.Response.Headers);
+                loggerContainer.LoggerContext.GetContextProvider().LogAsFile(responseBody, fileName);
+            }
+
+            responseStream.MirrorStream.Dispose();
+        }
         private MirrorStreamDecorator? GetResponseStream(HttpResponse response)
         {
             if (response.Body != null && response.Body is MirrorStreamDecorator stream)
