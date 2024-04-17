@@ -1,6 +1,7 @@
 ﻿using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.LogBee.Context;
+using System;
 
 namespace Serilog.Sinks.LogBee;
 

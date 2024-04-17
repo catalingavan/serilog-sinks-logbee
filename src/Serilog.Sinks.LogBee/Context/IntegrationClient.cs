@@ -1,9 +1,11 @@
-﻿namespace Serilog.Sinks.LogBee.Context
+﻿using System;
+
+namespace Serilog.Sinks.LogBee.Context
 {
     public class IntegrationClient
     {
-        public string Name { get; init; }
-        public Version Version { get; init; }
+        public string Name { get; private set; }
+        public Version Version { get; private set; }
 
         public IntegrationClient(string name, Version version)
         {

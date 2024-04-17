@@ -1,4 +1,8 @@
-﻿namespace Serilog.Sinks.LogBee.Rest
+﻿using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+namespace Serilog.Sinks.LogBee.Rest
 {
     internal class LogBeeRestClient
     {
@@ -22,7 +26,7 @@
 
                 using var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri);
                 httpRequest.Content = content;
-                using HttpResponseMessage response = HttpClient.Send(httpRequest);
+                using HttpResponseMessage response = HttpClient.SendAsync(httpRequest).Result;
 
                 Console.WriteLine($"Response: {response.StatusCode}");
             }

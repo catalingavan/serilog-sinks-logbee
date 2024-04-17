@@ -1,12 +1,13 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.IO;
 
 namespace Serilog.Sinks.LogBee.Context
 {
     public class LoggedFile : IDisposable
     {
-        public string FilePath { get; init; }
-        public string FileName { get; init; }
-        public long FileSize { get; init; }
+        public string FilePath { get; private set; }
+        public string FileName { get; private set; }
+        public long FileSize { get; private set; }
 
         public LoggedFile(string filePath, string fileName, long fileSize)
         {

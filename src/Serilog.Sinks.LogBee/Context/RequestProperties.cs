@@ -1,4 +1,7 @@
-﻿namespace Serilog.Sinks.LogBee.Context
+﻿using System;
+using System.Collections.Generic;
+
+namespace Serilog.Sinks.LogBee.Context
 {
     public class RequestProperties
     {

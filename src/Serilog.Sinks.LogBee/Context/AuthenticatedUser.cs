@@ -1,8 +1,10 @@
-﻿namespace Serilog.Sinks.LogBee.Context
+﻿using System;
+
+namespace Serilog.Sinks.LogBee.Context
 {
     public class AuthenticatedUser
     {
-        public string Name { get; init; }
+        public string Name { get; private set; }
 
         public AuthenticatedUser(string name)
         {

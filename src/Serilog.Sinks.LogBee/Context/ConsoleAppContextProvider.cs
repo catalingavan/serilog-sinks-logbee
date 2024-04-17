@@ -1,4 +1,6 @@
-﻿namespace Serilog.Sinks.LogBee.Context
+﻿using System;
+
+namespace Serilog.Sinks.LogBee.Context
 {
     public class ConsoleAppContextProvider : ContextProvider
     {

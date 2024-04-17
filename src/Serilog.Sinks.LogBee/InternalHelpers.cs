@@ -1,8 +1,12 @@
 ﻿using Serilog.Sinks.LogBee.Context;
 using Serilog.Sinks.LogBee.Rest;
+using System;
+using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Serilog.Sinks.LogBee
 {

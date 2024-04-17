@@ -1,4 +1,8 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Serilog.Sinks.LogBee.Context
 {
@@ -27,7 +31,7 @@ namespace Serilog.Sinks.LogBee.Context
             if (string.IsNullOrEmpty(contents))
                 return;
 
-            fileName = (string.IsNullOrWhiteSpace(fileName) ? "File" : fileName).Trim();
+            fileName = (fileName == null || string.IsNullOrWhiteSpace(fileName) ? "File" : fileName).Trim();
             fileName = FILE_NAME_REGEX.Replace(fileName, string.Empty).Trim();
 
             if (string.IsNullOrWhiteSpace(fileName))

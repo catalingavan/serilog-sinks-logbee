@@ -1,12 +1,14 @@
-﻿namespace Serilog.Sinks.LogBee
+﻿using System;
+
+namespace Serilog.Sinks.LogBee
 {
     public class LogBeeApiKey
     {
-        internal bool IsValid { get; init; }
+        internal bool IsValid { get; private set; }
 
-        public string OrganizationId { get; init; } = default!;
-        public string ApplicationId { get; init; } = default!;
-        public Uri LogBeeUri { get; init; } = default!;
+        public string OrganizationId { get; private set; } = default!;
+        public string ApplicationId { get; private set; } = default!;
+        public Uri LogBeeUri { get; private set; } = default!;
 
         public LogBeeApiKey(string organizationId, string applicationId, string logBeeEndpoint)
         {

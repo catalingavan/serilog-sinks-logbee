@@ -1,4 +1,8 @@
-﻿namespace Serilog.Sinks.LogBee
+﻿using System;
+using System.IO;
+using System.Linq;
+
+namespace Serilog.Sinks.LogBee
 {
     internal class TemporaryFile : IDisposable
     {
@@ -19,7 +23,7 @@
             if (string.IsNullOrWhiteSpace(extension))
                 extension = DEFAULT_EXTENSION;
 
-            extension = extension.Replace(".", string.Empty).Trim().ToLowerInvariant();
+            extension = (extension ?? "").Replace(".", string.Empty).Trim().ToLowerInvariant();
 
             if (AllowedExtensions.Any(p => extension == p) == false)
                 extension = DEFAULT_EXTENSION;

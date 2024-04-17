@@ -1,8 +1,10 @@
-﻿namespace Serilog.Sinks.LogBee.Context
+﻿using System.Collections.Generic;
+
+namespace Serilog.Sinks.LogBee.Context
 {
     public class ResponseProperties
     {
-        public int StatusCode { get; init; }
+        public int StatusCode { get; private set; }
         public Dictionary<string, string>? Headers { get; set; }
         public long? ContentLength { get; set; }
 
