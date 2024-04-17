@@ -11,12 +11,28 @@ namespace Serilog.Sinks.LogBee
         public static readonly Lazy<IntegrationClient> IntegrationClient =
             new Lazy<IntegrationClient>(() =>
             {
-                AssemblyName assembly = typeof(InternalHelpers).Assembly.GetName();
-                string name = assembly.Name ?? assembly.FullName;
-                Version version = assembly.Version ?? new Version(0, 0, 1);
-
-                return new IntegrationClient(name, version);
+                return GetIntegrationClient(typeof(InternalHelpers).Assembly);
             });
+
+        public static IntegrationClient GetIntegrationClient(Assembly assembly)
+        {
+            if (assembly == null)
+                throw new ArgumentNullException(nameof(assembly));
+
+            var assemblyName = assembly.GetName();
+            string? name = assemblyName.Name;
+            if(string.IsNullOrWhiteSpace(name))
+            {
+                name = assemblyName.FullName;
+                if (name.IndexOf(",") > -1)
+                    name = name.Substring(0, name.IndexOf(","));
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+                name = "Serilog.Sinks.LogBee";
+
+            return new IntegrationClient(name, assemblyName.Version ?? new Version(0, 0, 1));
+        }
 
         public static string? GetMachineName()
         {
