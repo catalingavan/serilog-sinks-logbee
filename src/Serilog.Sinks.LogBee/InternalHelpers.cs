@@ -54,13 +54,14 @@ namespace Serilog.Sinks.LogBee
                 {
                     AbsoluteUri = request.AbsoluteUri.ToString(),
                     Method = request.Method,
+                    RemoteAddress = request.RemoteAddress,
                     Request = new CreateRequestLogPayload.HttpPropertiesPayload.RequestPropertiesPayload
                     {
                         Headers = request.Headers,
                         FormData = request.FormData,
                         Claims = request.Claims,
                         Cookies = request.Cookies,
-                        InputStream = request.RequestBody
+                        InputStream = request.RequestBody,
                     },
                     Response = new CreateRequestLogPayload.HttpPropertiesPayload.ResponsePropertiesPayload
                     {

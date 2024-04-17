@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Serilog.Sinks.LogBee.Context;
+using System.Security.Claims;
+using System.Security.Principal;
 using System.Text;
 
 namespace Serilog.Sinks.LogBee.AspNetCore
@@ -28,6 +30,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             {
                 Headers = ReadRequestHeaders(request, request.Headers),
                 Cookies = ReadRequestCookies(request, request.Cookies),
+                Claims = ReadClaims(),
+                RemoteAddress = _httpContext.Connection.RemoteIpAddress?.ToString()
             };
 
             if (request.HasFormContentType)
@@ -45,7 +49,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
             var result = new ResponseProperties(response.StatusCode)
             {
-                Headers = ToDictionary(response.Headers)
+                Headers = ReadResponseHeaders(_httpContext, response.Headers)
             };
 
             HttpLoggerContainer? loggerContainer = AspNetCoreHelpers.GetHttpLoggerContainer(_httpContext);
@@ -135,5 +139,54 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
             return result;
         }
+
+        private Dictionary<string, string> ReadClaims()
+        {
+            IIdentity? identity = _httpContext.User.Identity;
+            if (identity == null)
+                return new();
+
+            if (identity is ClaimsIdentity claimsIdentity == false)
+                return new();
+
+            var result = new Dictionary<string, string>();
+
+            foreach (var claim in claimsIdentity.Claims)
+            {
+                if (string.IsNullOrWhiteSpace(claim.Type))
+                    continue;
+
+                if (_config.ShouldReadClaim.Invoke(_httpContext, claim))
+                {
+                    result.TryAdd(claim.Type, claim.Value);
+                }
+            }
+
+            return result;
+        }
+
+        private Dictionary<string, string> ReadResponseHeaders(HttpContext context, IHeaderDictionary collection)
+        {
+            if (collection == null)
+                return new Dictionary<string, string>();
+
+            Dictionary<string, string> result = new Dictionary<string, string>();
+
+            foreach (var keyValuePair in collection)
+            {
+                string key = keyValuePair.Key;
+                if (string.IsNullOrWhiteSpace(key))
+                    continue;
+
+                if (_config.ShouldReadResponseHeader.Invoke(context, keyValuePair))
+                {
+                    string value = keyValuePair.Value.ToString();
+                    result.TryAdd(key, value);
+                }
+            }
+
+            return result;
+        }
+
     }
 }

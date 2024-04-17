@@ -36,7 +36,7 @@ internal class LogBeeSink : ILogEventSink
         if (httpLoggerContainer == null)
         {
             var loggerContext = new LoggerContext(
-                new HttpContextProvider(httpContext),
+                new HttpContextProvider(httpContext, _config),
                 _apiKey,
                 _config
             );

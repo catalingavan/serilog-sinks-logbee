@@ -9,6 +9,7 @@
         public Dictionary<string, string>? FormData { get; set; }
         public Dictionary<string, string>? Claims { get; set; }
         public string? RequestBody { get; set; }
+        public string? RemoteAddress { get; set; }
 
         public RequestProperties(Uri absoluteUri, string method)
         {
