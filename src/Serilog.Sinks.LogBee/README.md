@@ -1,6 +1,6 @@
 # Serilog.Sinks.LogBee
 
-A Serilog sink that writes events to [logbee.net](https://logbee.net).
+A Serilog sink that writes events to [logBee.net](https://logbee.net).
 
 Using the static ``Logger``:
 
