@@ -27,11 +27,11 @@ jobs:
         env:
           BUILD_VERSION: ${{ github.event.inputs.release_version }}
         run: |
-          dotnet build src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --configuration Release
+          dotnet build src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --configuration Release /p:Version=${{ github.event.inputs.release_version }}
 
       - name: Pack Serilog.Sinks.LogBee
         run: |
-          dotnet pack src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --configuration Release -o .
+          dotnet pack src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --no-build -o . /p:PackageVersion=${{ github.event.inputs.release_version }}
 
       - name: Upload nuget package
         uses: actions/upload-artifact@v4
