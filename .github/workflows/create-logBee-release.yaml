@@ -33,13 +33,11 @@ jobs:
         run: |
           dotnet pack src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --no-build -o . /p:PackageVersion=${{ github.event.inputs.release_version }}
 
-      - name: Upload nuget package
-        uses: actions/upload-artifact@v4
-        with:
-          name: Serilog.Sinks.LogBee.nupkg
-          path: ./*.nupkg
+      - name: Publish NuGet package
+        run: |
+          dotnet nuget push "./*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
 
-      - name: Push to NuGet
+      - name: Publish GitHub package
         run: |
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.LOGBEE_RELEASE }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/logBee-net/index.json"
           dotnet nuget push "./*.nupkg" --source "github"
@@ -50,6 +48,5 @@ jobs:
           body: Serilog.Sinks.LogBee.${{ github.event.inputs.release_version }}
           draft: false
           tag_name: Serilog.Sinks.LogBee.${{ github.event.inputs.release_version }}
-          # token: ${{ secrets.LOGBEE_RELEASE }}
           files: |
             ./*.nupkg
