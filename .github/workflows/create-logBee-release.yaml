@@ -41,7 +41,7 @@ jobs:
 
       - name: Push to NuGet
         run: |
-          dotnet nuget add source --username catalingavan@gmail.com --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/logBee-net/index.json"
+          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.LOGBEE_RELEASE }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/logBee-net/index.json"
           dotnet nuget push "./*.nupkg" --source "github"
 
       - name: Release
