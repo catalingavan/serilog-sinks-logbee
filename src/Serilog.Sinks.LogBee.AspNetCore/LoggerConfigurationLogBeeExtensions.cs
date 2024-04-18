@@ -1,7 +1,6 @@
 ﻿using Serilog.Configuration;
 using Serilog.Sinks.LogBee;
-using Serilog.Sinks.LogBee.Context;
-using System;
+using Serilog.Sinks.LogBee.AspNetCore;
 
 namespace Serilog;
 
@@ -13,39 +12,38 @@ public static class LoggerConfigurationLogBeeExtensions
     public static LoggerConfiguration LogBee(
         this LoggerSinkConfiguration loggerConfiguration,
         LogBeeApiKey apiKey,
-        Action<LogBeeSinkConfiguration>? configAction = null)
+        IServiceProvider serviceProvider)
     {
-        return LogBee(loggerConfiguration, apiKey, new ConsoleAppContextProvider(), configAction);
+        return LogBee(loggerConfiguration, apiKey, serviceProvider, (config) => { });
     }
 
     public static LoggerConfiguration LogBee(
         this LoggerSinkConfiguration loggerConfiguration,
         LogBeeApiKey apiKey,
-        ContextProvider contextProvider,
-        Action<LogBeeSinkConfiguration>? configAction = null)
+        IServiceProvider serviceProvider,
+        Action<LogBeeSinkAspNetCoreConfiguration> configAction)
     {
         if (loggerConfiguration == null)
             throw new ArgumentNullException(nameof(loggerConfiguration));
 
-        if (contextProvider == null)
-            throw new ArgumentNullException(nameof(contextProvider));
-
         if (apiKey == null)
             throw new ArgumentNullException(nameof(apiKey));
 
-        if(!apiKey.IsValid)
+        if (serviceProvider == null)
+            throw new ArgumentNullException(nameof(serviceProvider));
+
+        if (configAction == null)
+            throw new ArgumentNullException(nameof(configAction));
+
+        if (!apiKey.IsValid)
         {
             return loggerConfiguration.Sink(new NullLogBeeSink());
         }
 
-        var config = new LogBeeSinkConfiguration();
-        configAction?.Invoke(config);
+        var config = new LogBeeSinkAspNetCoreConfiguration();
+        configAction(config);
 
-        var logBeeSink = new LogBeeSink(
-            apiKey,
-            contextProvider,
-            config
-        );
+        var logBeeSink = new Serilog.Sinks.LogBee.AspNetCore.LogBeeSink(apiKey, serviceProvider, config);
 
         return loggerConfiguration.Sink(
             logBeeSink

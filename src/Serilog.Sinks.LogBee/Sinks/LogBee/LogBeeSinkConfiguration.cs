@@ -1,52 +1,11 @@
-﻿using Serilog.Sinks.LogBee.RequestInfo;
+﻿using System;
 
-namespace Serilog.Sinks.LogBee;
-
-public class LogBeeSinkConfiguration
+namespace Serilog.Sinks.LogBee
 {
-    public string OrganizationId { get; init; }
-    public string ApplicationId { get; init; }
-    public Uri LogBeeUri { get; init; }
-    public IRequestInfoProvider? RequestInfoProvider { get; init; }
-    public IServiceProvider? ServiceProvider { get; init; }
-
-    public LogBeeSinkConfiguration(
-        string organizationId,
-        string applicationId,
-        string logBeeEndpoint,
-        IRequestInfoProvider requestInfoProvider) : this(organizationId, applicationId, logBeeEndpoint)
+    public class LogBeeSinkConfiguration
     {
-        RequestInfoProvider = requestInfoProvider ?? throw new ArgumentNullException(nameof(logBeeEndpoint));
-    }
-
-    public LogBeeSinkConfiguration(
-        string organizationId,
-        string applicationId,
-        string logBeeEndpoint,
-        IServiceProvider serviceProvider) : this(organizationId, applicationId, logBeeEndpoint)
-    {
-        ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-    }
-
-    public LogBeeSinkConfiguration(
-        string organizationId,
-        string applicationId,
-        string logBeeEndpoint)
-    {
-        if (string.IsNullOrWhiteSpace(organizationId))
-            throw new ArgumentNullException(nameof(organizationId));
-
-        if (string.IsNullOrWhiteSpace(applicationId))
-            throw new ArgumentNullException(nameof(applicationId));
-
-        if (string.IsNullOrWhiteSpace(logBeeEndpoint))
-            throw new ArgumentNullException(nameof(logBeeEndpoint));
-
-        if(!Uri.TryCreate(logBeeEndpoint, UriKind.Absolute, out var logBeeUri))
-            throw new ArgumentException($"{nameof(logBeeEndpoint)} must be an absolute URI");
-
-        OrganizationId = organizationId;
-        ApplicationId = applicationId;
-        LogBeeUri = logBeeUri;
+        public TimeSpan ClientTimeout { get; set; } = TimeSpan.FromSeconds(10);
+        public long MaximumAllowedFileSizeInBytes { get; set; } = 5 * 1024 * 1024;
+        public Func<Exception, string?> AppendExceptionDetails { get; set; } = (ex) => null;
     }
 }

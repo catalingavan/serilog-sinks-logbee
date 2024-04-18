@@ -1,4 +1,7 @@
-﻿namespace Serilog.Sinks.LogBee.Rest
+﻿using System;
+using System.Collections.Generic;
+
+namespace Serilog.Sinks.LogBee.Rest
 {
     internal class CreateRequestLogPayload
     {

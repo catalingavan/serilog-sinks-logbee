@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.LogBee.dotnet6_WebApp", "Serilog.Sinks.LogBee.dotnet6_WebApp.csproj", "{07291713-1005-4A6D-B0DC-31C5FEDF4964}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.LogBee.AspNetCore", "..\..\src\Serilog.Sinks.LogBee.AspNetCore\Serilog.Sinks.LogBee.AspNetCore.csproj", "{2FD6268D-1272-4F14-A13F-3FBA4DE32ECC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.LogBee", "..\..\src\Serilog.Sinks.LogBee\Serilog.Sinks.LogBee.csproj", "{0EE17C86-2686-4AFB-A57B-7E9A66EFBB78}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{07291713-1005-4A6D-B0DC-31C5FEDF4964}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07291713-1005-4A6D-B0DC-31C5FEDF4964}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07291713-1005-4A6D-B0DC-31C5FEDF4964}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07291713-1005-4A6D-B0DC-31C5FEDF4964}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FD6268D-1272-4F14-A13F-3FBA4DE32ECC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FD6268D-1272-4F14-A13F-3FBA4DE32ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FD6268D-1272-4F14-A13F-3FBA4DE32ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FD6268D-1272-4F14-A13F-3FBA4DE32ECC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EE17C86-2686-4AFB-A57B-7E9A66EFBB78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EE17C86-2686-4AFB-A57B-7E9A66EFBB78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EE17C86-2686-4AFB-A57B-7E9A66EFBB78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EE17C86-2686-4AFB-A57B-7E9A66EFBB78}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F6B4F91E-942E-46CD-A620-F52CE6DCC97E}
+	EndGlobalSection
+EndGlobal

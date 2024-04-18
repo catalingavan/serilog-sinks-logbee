@@ -1,53 +1,66 @@
-﻿using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
+﻿using System;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Serilog.Sinks.LogBee.Rest
 {
-    internal class LogBeeRestClient : ILogBeeRestClient
+    internal class LogBeeRestClient
     {
-        private static readonly HttpClient HttpClient = new HttpClient();
-
-        private readonly string _organizationId;
-        private readonly string _applicationId;
-        private readonly Uri _logBeeUri;
+        private readonly HttpClient _httpClient;
         public LogBeeRestClient(
-            string organizationId,
-            string applicationId,
-            Uri logBeeUri)
+            HttpClient httpClient)
         {
-            if (string.IsNullOrWhiteSpace(organizationId))
-                throw new ArgumentNullException(nameof(organizationId));
-
-            if (string.IsNullOrWhiteSpace(applicationId))
-                throw new ArgumentNullException(nameof(applicationId));
-
-            if (logBeeUri == null)
-                throw new ArgumentNullException(nameof(logBeeUri));
-
-            if(!logBeeUri.IsAbsoluteUri)
-                throw new ArgumentException($"{nameof(logBeeUri)} must be an absolute URI");
-
-            _organizationId = organizationId;
-            _applicationId = applicationId;
-            _logBeeUri = logBeeUri;
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
-        public void CreateRequestLog(CreateRequestLogPayload payload)
+        public void CreateRequestLog(HttpContent content)
         {
-            if (payload == null)
-                throw new ArgumentNullException(nameof(payload));
+            if (content == null)
+                throw new ArgumentNullException(nameof(content));
 
-            Uri uri = new Uri(_logBeeUri, "/request-logs");
+            using (content)
+            {
+                using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/request-logs");
+                httpRequest.Content = content;
+                using HttpResponseMessage response = _httpClient.SendAsync(httpRequest).Result;
+                if(!response.IsSuccessStatusCode)
+                {
+                    LogUnsuccessfulResponse(httpRequest, response);
+                }
+            }
+        }
 
-            string requestPayload = JsonSerializer.Serialize(payload);
+        public async Task CreateRequestLogAsync(HttpContent content)
+        {
+            if (content == null)
+                throw new ArgumentNullException(nameof(content));
 
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri);
-            using HttpContent content = new StringContent(requestPayload, Encoding.UTF8, "application/json");
-            httpRequest.Content = content;
-            using HttpResponseMessage response = HttpClient.Send(httpRequest);
-            
-            Console.WriteLine($"Response: {response.StatusCode}");
+            using (content)
+            {
+                using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/request-logs");
+                httpRequest.Content = content;
+                using HttpResponseMessage response = await _httpClient.SendAsync(httpRequest);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    LogUnsuccessfulResponse(httpRequest, response);
+                }
+            }
+        }
+
+        private void LogUnsuccessfulResponse(HttpRequestMessage request, HttpResponseMessage response)
+        {
+            string responseAsStr = response.Content.ReadAsStringAsync().Result;
+            var sb = new StringBuilder();
+            sb.AppendLine($"Serilog.Sinks.LogBee: '{request.Method} {request.RequestUri}' responded with {(int)response.StatusCode} {response.StatusCode}");
+            if (!string.IsNullOrWhiteSpace(responseAsStr))
+            {
+                responseAsStr = responseAsStr.Replace("{", "{{").Replace("}", "}}");
+                sb.AppendLine(responseAsStr);
+            }
+
+            Serilog.Debugging.SelfLog.WriteLine(sb.ToString());
         }
     }
 }

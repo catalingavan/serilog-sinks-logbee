@@ -1,0 +1,40 @@
+name: Create Serilog.Sinks.LogBee release
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        type: string
+        required: true
+        description: Release version
+        default: '1.0.0'
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET6
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+
+      - name: Build Serilog.Sinks.LogBee
+        env:
+          BUILD_VERSION: ${{ github.event.inputs.release_version }}
+        run: |
+          dotnet build src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --configuration Release
+
+      - name: Pack Serilog.Sinks.LogBee
+        run: |
+          dotnet pack src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --configuration Release -o .
+
+      - name: Upload nuget package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormsBuilder.Modules-v${{ github.event.inputs.release_version }}-linux-x64
+          path: ./*.nupkg
