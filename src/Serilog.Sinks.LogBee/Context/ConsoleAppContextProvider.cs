@@ -31,11 +31,11 @@ namespace Serilog.Sinks.LogBee.Context
         public override RequestProperties GetRequestProperties() => _requestProperties;
         public override ResponseProperties GetResponseProperties() => _responseProperties;
         public override AuthenticatedUser? GetAuthenticatedUser() => _authenticatedUser;
-        public void SetRequest(RequestProperties requestProperties)
+        public override void SetRequest(RequestProperties requestProperties)
         {
             _requestProperties = requestProperties ?? throw new ArgumentNullException(nameof(requestProperties));
         }
-        public void SetResponse(ResponseProperties responseProperties)
+        public override void SetResponse(ResponseProperties responseProperties)
         {
             _responseProperties = responseProperties ?? throw new ArgumentNullException(nameof(responseProperties));
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Serilog.Sinks.LogBee.Context
 {
@@ -10,7 +11,9 @@ namespace Serilog.Sinks.LogBee.Context
     {
         private static readonly Regex FILE_NAME_REGEX = new Regex(@"[^a-zA-Z0-9_\-\+\. ]+", RegexOptions.Compiled);
 
-        private readonly List<LoggedFile> _loggedFiles;
+        internal LoggerContext? Logger { get; set; }
+
+        private List<LoggedFile> _loggedFiles;
         private List<string> _keywords;
         public ContextProvider()
         {
@@ -20,7 +23,9 @@ namespace Serilog.Sinks.LogBee.Context
 
         public abstract DateTime GetStartedAt();
         public abstract RequestProperties GetRequestProperties();
+        public abstract void SetRequest(RequestProperties requestProperties);
         public abstract ResponseProperties GetResponseProperties();
+        public abstract void SetResponse(ResponseProperties responseProperties);
         public abstract AuthenticatedUser? GetAuthenticatedUser();
         public virtual IntegrationClient GetIntegrationClient() => InternalHelpers.IntegrationClient.Value;
         public List<LoggedFile> GetLoggedFiles() => _loggedFiles.ToList();
@@ -57,10 +62,20 @@ namespace Serilog.Sinks.LogBee.Context
             _keywords = keywords ?? throw new ArgumentNullException(nameof(keywords));
         }
 
-        public virtual void Dispose()
+        public void Flush() => Logger?.Flush();
+        public Task FlushAsync() => Logger == null ? Task.CompletedTask : Logger.FlushAsync();
+
+        internal void Reset()
         {
             foreach (var file in _loggedFiles)
                 file.Dispose();
+
+            _loggedFiles = new();
+        }
+
+        public virtual void Dispose()
+        {
+            Reset();
         }
     }
 }

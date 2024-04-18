@@ -14,13 +14,13 @@ namespace Serilog.Sinks.LogBee
     {
         private const string EXCEPTION_LOGGED_KEY = "Serilog.Sinks.LogBee.ExceptionLogged";
 
-        private readonly Guid _loggerId;
+        private Guid _loggerId;
+        private List<CreateRequestLogPayload.LogMessagePayload> _logs;
+        private List<CreateRequestLogPayload.ExceptionPayload> _exceptions;
         private readonly ContextProvider _contextProvider;
         private readonly LogBeeApiKey _apiKey;
         private readonly LogBeeSinkConfiguration _config;
         private readonly HttpClient _httpClient;
-        private readonly List<CreateRequestLogPayload.LogMessagePayload> _logs;
-        private readonly List<CreateRequestLogPayload.ExceptionPayload> _exceptions;
         public LoggerContext(
             ContextProvider contextProvider,
             LogBeeApiKey apiKey,
@@ -33,6 +33,8 @@ namespace Serilog.Sinks.LogBee
             _httpClient = CreateClient(apiKey, config);
             _logs = new();
             _exceptions = new();
+
+            _contextProvider.Logger = this;
         }
 
         public void Emit(LogEvent logEvent)
@@ -81,6 +83,8 @@ namespace Serilog.Sinks.LogBee
 
             var client = new LogBeeRestClient(_httpClient);
             client.CreateRequestLog(httpContent);
+
+            Reset();
         }
 
         public async Task FlushAsync()
@@ -90,6 +94,16 @@ namespace Serilog.Sinks.LogBee
 
             var client = new LogBeeRestClient(_httpClient);
             await client.CreateRequestLogAsync(httpContent).ConfigureAwait(false);
+
+            Reset();
+        }
+
+        public void Reset()
+        {
+            _loggerId = Guid.NewGuid();
+            _logs = new();
+            _exceptions = new();
+            _contextProvider.Reset();
         }
 
         public void Dispose()
