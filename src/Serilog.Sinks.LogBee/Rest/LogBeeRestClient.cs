@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Serilog.Sinks.LogBee.Rest
 {
     internal class LogBeeRestClient
     {
-        private static readonly HttpClient HttpClient = new HttpClient();
-
-        private readonly LogBeeApiKey _apiKey;
+        private readonly HttpClient _httpClient;
         public LogBeeRestClient(
-            LogBeeApiKey apiKey)
+            HttpClient httpClient)
         {
-            _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         public void CreateRequestLog(HttpContent content)
@@ -22,13 +21,13 @@ namespace Serilog.Sinks.LogBee.Rest
 
             using (content)
             {
-                Uri uri = new Uri(_apiKey.LogBeeUri, "/request-logs");
-
-                using var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri);
+                using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/request-logs");
                 httpRequest.Content = content;
-                using HttpResponseMessage response = HttpClient.SendAsync(httpRequest).Result;
-
-                Console.WriteLine($"Response: {response.StatusCode}");
+                using HttpResponseMessage response = _httpClient.SendAsync(httpRequest).Result;
+                if(!response.IsSuccessStatusCode)
+                {
+                    LogUnsuccessfulResponse(httpRequest, response);
+                }
             }
         }
 
@@ -39,14 +38,29 @@ namespace Serilog.Sinks.LogBee.Rest
 
             using (content)
             {
-                Uri uri = new Uri(_apiKey.LogBeeUri, "/request-logs");
-
-                using var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri);
+                using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/request-logs");
                 httpRequest.Content = content;
-                using HttpResponseMessage response = await HttpClient.SendAsync(httpRequest);
+                using HttpResponseMessage response = await _httpClient.SendAsync(httpRequest);
 
-                Console.WriteLine($"Response: {response.StatusCode}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    LogUnsuccessfulResponse(httpRequest, response);
+                }
             }
+        }
+
+        private void LogUnsuccessfulResponse(HttpRequestMessage request, HttpResponseMessage response)
+        {
+            string responseAsStr = response.Content.ReadAsStringAsync().Result;
+            var sb = new StringBuilder();
+            sb.AppendLine($"Serilog.Sinks.LogBee: '{request.Method} {request.RequestUri}' responded with {(int)response.StatusCode} {response.StatusCode}");
+            if (!string.IsNullOrWhiteSpace(responseAsStr))
+            {
+                responseAsStr = responseAsStr.Replace("{", "{{").Replace("}", "}}");
+                sb.AppendLine(responseAsStr);
+            }
+
+            Serilog.Debugging.SelfLog.WriteLine(sb.ToString());
         }
     }
 }

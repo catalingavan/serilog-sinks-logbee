@@ -24,7 +24,6 @@ internal class LogBeeSink : ILogEventSink, IDisposable
     public void Dispose()
     {
         InternalHelpers.WrapInTryCatch(() => _loggerContext.Flush());
-        
         _loggerContext.Dispose();
     }
 }

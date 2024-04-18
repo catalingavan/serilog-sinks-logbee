@@ -2,7 +2,7 @@
 
 A Serilog sink that writes events to [logBee.net](https://logbee.net).
 
-``Serilog.Sinks.LogBee`` sink keeps the events in memory and commits them only when the ``Logger`` is flushed.
+LogBee sink keeps the events in memory and commits them only when the logger is flushed.
 
 Simple usage:
 

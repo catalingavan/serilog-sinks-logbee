@@ -31,4 +31,10 @@ jobs:
 
       - name: Pack Serilog.Sinks.LogBee
         run: |
-          dotnet pack src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --configuration Release
+          dotnet pack src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --configuration Release -o .
+
+      - name: Upload nuget package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormsBuilder.Modules-v${{ github.event.inputs.release_version }}-linux-x64
+          path: ./*.nupkg
