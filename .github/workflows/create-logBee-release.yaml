@@ -36,5 +36,15 @@ jobs:
       - name: Upload nuget package
         uses: actions/upload-artifact@v4
         with:
-          name: Serilog.Sinks.LogBee
+          name: Serilog.Sinks.LogBee.nupkg
           path: ./*.nupkg
+
+      - name: Release
+        uses: softprops/action-gh-release@v2.0.4
+        with:
+          body: Serilog.Sinks.LogBee.${{ github.event.inputs.release_version }}
+          draft: false
+          tag_name: Serilog.Sinks.LogBee.${{ github.event.inputs.release_version }}
+          # token: ${{ secrets.LOGBEE_RELEASE }}
+          files: |
+            ./*.nupkg
