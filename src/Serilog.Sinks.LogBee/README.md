@@ -21,7 +21,7 @@ Log.Logger =
 
 Log.Information("First log message from Serilog");
 
-// make sure to flush the logger so the events are sent to logBee
+// make sure to flush the logger so the events are sent to logBee.net
 await Log.CloseAndFlushAsync();
 ```
 
@@ -32,6 +32,7 @@ using Serilog;
 using Serilog.Sinks.LogBee;
 using Serilog.Sinks.LogBee.Context;
 
+// contextProvider can be used to set additional properties that are sent to logBee.net
 var contextProvider = new ConsoleAppContextProvider("http://application/console/main");
 
 Log.Logger =
