@@ -2,7 +2,7 @@
 
 A Serilog sink that writes events to [logBee.net](https://logbee.net).
 
-Using the static ``Logger``:
+Simple usage:
 
 ```csharp
 using Serilog;
@@ -22,25 +22,42 @@ Log.Logger =
 Log.Information("First log message from Serilog");
 
 // make sure to flush the logger so the events are sent to logBee
-Log.CloseAndFlush();
+await Log.CloseAndFlushAsync();
 ```
 
-Using a local ``Logger``:
+Advanced usage:
 
 ```csharp
 using Serilog;
 using Serilog.Sinks.LogBee;
+using Serilog.Sinks.LogBee.Context;
 
-using(var log = new LoggerConfiguration()
-    .WriteTo.LogBee(
-        new LogBeeApiKey(
-            "__LogBee.OrganizationId__",
-            "__LogBee.ApplicationId__",
-            "https://api.logbee.net"
+var contextProvider = new ConsoleAppContextProvider("http://application/console/main");
+
+Log.Logger =
+    new LoggerConfiguration()
+        .WriteTo.LogBee(
+            new LogBeeApiKey(
+                "__LogBee.OrganizationId__",
+                "__LogBee.ApplicationId__",
+                "https://api.logbee.net"
+            ),
+            contextProvider
         )
-    )
-    .CreateLogger())
+        .CreateLogger();
+
+try
 {
-    log.Information("First log message from Serilog");
+    Log.Information("First log message from Serilog");
+    throw new InvalidOperationException("Oops...");
+}
+catch (Exception ex)
+{
+    Log.Error(ex, "Unhandled exception");
+    contextProvider.SetResponse(new ResponseProperties(500));
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
 }
 ```

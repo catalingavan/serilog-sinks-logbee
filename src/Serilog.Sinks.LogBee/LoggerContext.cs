@@ -4,6 +4,7 @@ using Serilog.Sinks.LogBee.Rest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Serilog.Sinks.LogBee
@@ -35,15 +36,16 @@ namespace Serilog.Sinks.LogBee
             DateTime startedAt = _contextProvider.GetStartedAt();
             int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - startedAt).TotalMilliseconds)));
 
-            _logs.Add(new CreateRequestLogPayload.LogMessagePayload
-            {
-                LogLevel = logEvent.Level.ToString(),
-                Message = logEvent.RenderMessage(),
-                MillisecondsSinceRequestStarted = duration
-            });
+            string message = logEvent.RenderMessage();
 
-            if (logEvent.Exception != null)
+            if(logEvent.Exception != null)
             {
+                var sb = new StringBuilder();
+                sb.AppendLine(message);
+                sb.Append(logEvent.Exception.ToString());
+                
+                message = sb.ToString();
+
                 var type = logEvent.Exception.GetType();
                 _exceptions.Add(new CreateRequestLogPayload.ExceptionPayload
                 {
@@ -51,6 +53,13 @@ namespace Serilog.Sinks.LogBee
                     ExceptionMessage = logEvent.Exception.Message
                 });
             }
+
+            _logs.Add(new CreateRequestLogPayload.LogMessagePayload
+            {
+                LogLevel = logEvent.Level.ToString(),
+                Message = message,
+                MillisecondsSinceRequestStarted = duration
+            });
         }
 
         public List<CreateRequestLogPayload.LogMessagePayload> GetLogs() => _logs.ToList();
