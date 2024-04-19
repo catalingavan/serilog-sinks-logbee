@@ -6,9 +6,9 @@ namespace Serilog.Sinks.LogBee;
 
 internal class LogBeeSink : ILogEventSink, IDisposable
 {
-    private readonly LoggerContext2 _loggerContext;
+    private readonly LoggerContext _loggerContext;
     public LogBeeSink(
-        LoggerContext2 logerContext)
+        LoggerContext logerContext)
     {
         _loggerContext = logerContext ?? throw new ArgumentNullException(nameof(logerContext));
     }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Serilog.Sinks.LogBee.Context
+namespace Serilog.Sinks.LogBee.ContextProperties
 {
     public class ResponseProperties
     {

@@ -20,7 +20,7 @@ public static class LoggerConfigurationLogBeeExtensions
     public static LoggerConfiguration LogBee(
         this LoggerSinkConfiguration loggerConfiguration,
         LogBeeApiKey apiKey,
-        LoggerContext2 loggerContext,
+        LoggerContext loggerContext,
         Action<LogBeeSinkConfiguration>? configAction = null)
     {
         if (loggerConfiguration == null)
