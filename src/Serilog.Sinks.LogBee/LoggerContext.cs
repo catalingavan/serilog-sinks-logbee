@@ -66,8 +66,12 @@ namespace Serilog.Sinks.LogBee
                 return;
 
             string? category = null;
-            if(logEvent.Properties.TryGetValue("SourceContext", out var value))
-                category = value.ToString();
+            if(logEvent.Properties.TryGetValue("SourceContext", out var value)
+                && (value is ScalarValue scalarValue)
+                && scalarValue.Value is string strValue)
+            {
+                category = strValue;
+            }
 
             DateTime startedAt = _startedAt;
             int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - startedAt).TotalMilliseconds)));

@@ -2,5 +2,5 @@
 
 internal static class Constants
 {
-    public const string HTTP_LOGGER_CONTAINER = "Serilog.LogBee.Logger";
+    public const string HTTP_LOGGER_CONTEXT = "Serilog.LogBee.Logger";
 }

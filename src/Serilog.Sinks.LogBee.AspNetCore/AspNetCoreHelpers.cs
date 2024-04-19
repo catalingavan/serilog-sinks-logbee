@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Serilog.Sinks.LogBee.Context;
-using System.Reflection;
+using Serilog.Sinks.LogBee.ContextProperties;
 using System.Text;
 
 namespace Serilog.Sinks.LogBee.AspNetCore
@@ -35,10 +34,10 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             return config.ReadResponseBodyContentTypes?.Any(p => contentType.Contains(p)) == true;
         }
 
-        public static HttpLoggerContainer? GetHttpLoggerContainer(HttpContext context)
+        public static AspNetCoreLoggerContext? GetLoggerContext(HttpContext context)
         {
-            if (context.Items.TryGetValue(Constants.HTTP_LOGGER_CONTAINER, out var value))
-                return value as HttpLoggerContainer;
+            if (context.Items.TryGetValue(Constants.HTTP_LOGGER_CONTEXT, out var value) && value is AspNetCoreLoggerContext loggerContext)
+                return loggerContext;
 
             return null;
         }

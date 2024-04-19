@@ -7,7 +7,7 @@ namespace Serilog.Sinks.LogBee_ConsoleApp;
 
 class Program2
 {
-    static async Task Main2(string[] args)
+    static async Task Main(string[] args)
     {
         var loggerContext = new NonWebLoggerContext("http://application/console-app-Program2");
 

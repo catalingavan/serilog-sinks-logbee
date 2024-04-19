@@ -4,12 +4,12 @@ using Serilog.Events;
 
 namespace Serilog.Sinks.LogBee.AspNetCore;
 
-internal class LogBeeSink : ILogEventSink
+internal class AspNetCoreLogBeeSink : ILogEventSink
 {
     private readonly LogBeeApiKey _apiKey;
     private readonly IServiceProvider _serviceProvider;
     private readonly LogBeeSinkAspNetCoreConfiguration _config;
-    public LogBeeSink(
+    public AspNetCoreLogBeeSink(
         LogBeeApiKey apiKey,
         IServiceProvider serviceProvider,
         LogBeeSinkAspNetCoreConfiguration config)
@@ -32,19 +32,16 @@ internal class LogBeeSink : ILogEventSink
         if (httpContext == null)
             return;
 
-        HttpLoggerContainer? httpLoggerContainer = AspNetCoreHelpers.GetHttpLoggerContainer(httpContext);
-        if (httpLoggerContainer == null)
-        {
-            var loggerContext = new LoggerContext(
-                new HttpContextProvider(httpContext, _config),
-                _apiKey,
-                _config
-            );
-            httpLoggerContainer = new HttpLoggerContainer(loggerContext, _config);
+        AspNetCoreLoggerContext? loggerContext = null;
+        if (httpContext.Items.TryGetValue(Constants.HTTP_LOGGER_CONTEXT, out var value))
+            loggerContext = value as AspNetCoreLoggerContext;
 
-            httpContext.Items.Add(Constants.HTTP_LOGGER_CONTAINER, httpLoggerContainer);
+        if (loggerContext == null)
+        {
+            loggerContext = new AspNetCoreLoggerContext(httpContext, _config, _apiKey);
+            httpContext.Items.TryAdd(Constants.HTTP_LOGGER_CONTEXT, loggerContext);
         }
 
-        httpLoggerContainer.LoggerContext.Emit(logEvent);
+        loggerContext.Emit(logEvent);
     }
 }

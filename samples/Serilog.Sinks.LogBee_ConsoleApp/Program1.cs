@@ -4,7 +4,7 @@ using Serilog.Sinks.LogBee.ContextProperties;
 
 class Program1
 {
-    static async Task Main(string[] args)
+    static async Task Main2(string[] args)
     {
         var loggerContext = new NonWebLoggerContext("http://application/console-app-Program1");
 

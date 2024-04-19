@@ -12,16 +12,16 @@ public static class LoggerConfigurationLogBeeExtensions
     public static LoggerConfiguration LogBee(
         this LoggerSinkConfiguration loggerConfiguration,
         LogBeeApiKey apiKey,
-        Action<LogBeeSinkConfiguration>? configAction = null)
+        Action<LogBeeSinkConfiguration>? configureAction = null)
     {
-        return LogBee(loggerConfiguration, apiKey, new NonWebLoggerContext(), configAction);
+        return LogBee(loggerConfiguration, apiKey, new NonWebLoggerContext(), configureAction);
     }
 
     public static LoggerConfiguration LogBee(
         this LoggerSinkConfiguration loggerConfiguration,
         LogBeeApiKey apiKey,
         LoggerContext loggerContext,
-        Action<LogBeeSinkConfiguration>? configAction = null)
+        Action<LogBeeSinkConfiguration>? configureAction = null)
     {
         if (loggerConfiguration == null)
             throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -36,7 +36,7 @@ public static class LoggerConfigurationLogBeeExtensions
             return loggerConfiguration.Sink(new NullLogBeeSink());
 
         var config = new LogBeeSinkConfiguration();
-        configAction?.Invoke(config);
+        configureAction?.Invoke(config);
 
         loggerContext.Configure(apiKey, config);
 

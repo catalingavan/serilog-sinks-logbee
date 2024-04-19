@@ -1,27 +1,30 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Serilog.Sinks.LogBee.Context;
+using Serilog.Sinks.LogBee.ContextProperties;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
 
 namespace Serilog.Sinks.LogBee.AspNetCore
 {
-    internal class HttpContextProvider : ContextProvider
+    internal class AspNetCoreLoggerContext : LoggerContext
     {
         private readonly HttpContext _httpContext;
         private readonly LogBeeSinkAspNetCoreConfiguration _config;
-        private readonly DateTime _startedAt;
-        public HttpContextProvider(
+        public AspNetCoreLoggerContext(
             HttpContext httpContext,
-            LogBeeSinkAspNetCoreConfiguration config)
+            LogBeeSinkAspNetCoreConfiguration config,
+            LogBeeApiKey apiKey)
         {
             _httpContext = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            _startedAt = DateTime.UtcNow;
+
+            if (apiKey == null)
+                throw new ArgumentNullException(nameof(apiKey));
+
+            base.Configure(apiKey, config);
         }
 
-        public override DateTime GetStartedAt() => _startedAt;
-        public override RequestProperties GetRequestProperties()
+        internal override RequestProperties GetRequestProperties()
         {
             var request = _httpContext.Request;
             Uri requestUri = new Uri(GetDisplayUrl(_httpContext.Request), UriKind.Absolute);
@@ -37,13 +40,19 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             if (request.HasFormContentType)
                 result.FormData = ReadRequestFormData(request, request.Form);
 
-            HttpLoggerContainer? loggerContainer = AspNetCoreHelpers.GetHttpLoggerContainer(_httpContext);
-            if (loggerContainer != null)
-                result.RequestBody = loggerContainer.RequestBody;
+            InternalHelpers.WrapInTryCatch(() =>
+            {
+                if (AspNetCoreHelpers.CanReadRequestBody(request.Headers, _config) && _config.ShouldReadRequestBody(request))
+                {
+                    var provider = new ReadInputStreamProvider();
+                    result.RequestBody = provider.ReadInputStream(request);
+                }
+            });
 
             return result;
+
         }
-        public override ResponseProperties GetResponseProperties()
+        internal override ResponseProperties GetResponseProperties()
         {
             var response = _httpContext.Response;
 
@@ -52,13 +61,25 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 Headers = ReadResponseHeaders(_httpContext, response.Headers)
             };
 
-            HttpLoggerContainer? loggerContainer = AspNetCoreHelpers.GetHttpLoggerContainer(_httpContext);
-            if (loggerContainer?.ResponseContentLength != null)
-                response.ContentLength = loggerContainer.ResponseContentLength.Value;
+            InternalHelpers.WrapInTryCatch(() =>
+            {
+                var responseStream = GetResponseStream(_httpContext.Response);
+                if (responseStream != null)
+                {
+                    if (AspNetCoreHelpers.CanReadResponseBody(response.Headers, _config) && _config.ShouldReadResponseBody(_httpContext))
+                    {
+                        string? responseBody = AspNetCoreHelpers.ReadStreamAsString(responseStream.MirrorStream, responseStream.Encoding);
+                        string fileName = AspNetCoreHelpers.GetResponseFileName(response.Headers);
+                        LogAsFile(responseBody ?? string.Empty, fileName);
+                    }
+
+                    result.ContentLength = responseStream.MirrorStream.Length;
+                }
+            });
 
             return result;
         }
-        public override AuthenticatedUser? GetAuthenticatedUser()
+        internal override AuthenticatedUser? GetAuthenticatedUser()
         {
             if (_httpContext.User.Identity is ClaimsIdentity claimsIdentity == false)
                 return null;
@@ -69,7 +90,17 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
             return new AuthenticatedUser(name);
         }
-        public override IntegrationClient GetIntegrationClient() => AspNetCoreHelpers.IntegrationClient.Value;
+        internal override IntegrationClient GetIntegrationClient() => AspNetCoreHelpers.IntegrationClient.Value;
+        internal override List<string> GetKeywords() => _config.Keywords(_httpContext);
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            var responseStream = GetResponseStream(_httpContext.Response);
+            if (responseStream != null)
+                responseStream.MirrorStream.Dispose();
+        }
 
         private string GetDisplayUrl(HttpRequest request)
         {
@@ -200,5 +231,17 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             return result;
         }
 
+        private MirrorStreamDecorator? GetResponseStream(HttpResponse response)
+        {
+            if (response.Body != null && response.Body is MirrorStreamDecorator stream)
+            {
+                if (!stream.MirrorStream.CanRead)
+                    return null;
+
+                return stream;
+            }
+
+            return null;
+        }
     }
 }
