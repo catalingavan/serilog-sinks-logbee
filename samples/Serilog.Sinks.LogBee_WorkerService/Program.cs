@@ -1,9 +1,8 @@
 using Serilog;
 using Serilog.Sinks.LogBee;
-using Serilog.Sinks.LogBee.Context;
 using Serilog.Sinks.LogBee_WorkerService;
 
-var contextProvider = new ConsoleAppContextProvider("http://application/worker-service");
+var loggerContext = new NonWebLoggerContext("http://application/worker-service");
 
 Log.Logger =
     new LoggerConfiguration()
@@ -13,7 +12,7 @@ Log.Logger =
                 "4f729841-b103-460e-a87c-be6bd72f0cc9",
                 "https://api.logbee.net/"
             ),
-            contextProvider
+            loggerContext
         )
         .CreateLogger();
 
@@ -21,7 +20,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Logging.AddSerilog();
 
 builder.Services.AddHostedService<Worker>();
-builder.Services.AddSingleton<ContextProvider>(contextProvider);
+builder.Services.AddSingleton<LoggerContext2>(loggerContext);
 
 var host = builder.Build();
 host.Run();

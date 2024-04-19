@@ -151,6 +151,93 @@ namespace Serilog.Sinks.LogBee
             return form;
         }
 
+        public static CreateRequestLogPayload CreateRequestLogPayload(LoggerContext2 loggerContext)
+        {
+            if (loggerContext == null)
+                throw new ArgumentNullException(nameof(loggerContext));
+
+            var logBeeApiKey = loggerContext.ApiKey;
+
+            DateTime startedAt = loggerContext.StartedAt;
+            var request = new RequestProperties(new Uri("http://application"), "GET");
+            var response = new ResponseProperties(200);
+            int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - startedAt).TotalMilliseconds)));
+
+            var authenticatedUser = new AuthenticatedUser("catalingavan");
+            var integrationClient = IntegrationClient.Value;
+
+            CreateRequestLogPayload payload = new CreateRequestLogPayload
+            {
+                StartedAt = startedAt,
+                OrganizationId = logBeeApiKey.OrganizationId,
+                ApplicationId = logBeeApiKey.ApplicationId,
+                DurationInMilliseconds = duration,
+                IntegrationClient = new CreateRequestLogPayload.IntegrationClientPayload
+                {
+                    Name = integrationClient.Name,
+                    Version = integrationClient.Version.ToString()
+                },
+                MachineName = GetMachineName(),
+                User = authenticatedUser == null ? null : new CreateRequestLogPayload.UserPayload
+                {
+                    Name = authenticatedUser.Name
+                },
+                HttpProperties = new CreateRequestLogPayload.HttpPropertiesPayload
+                {
+                    AbsoluteUri = request.AbsoluteUri.ToString(),
+                    Method = request.Method,
+                    RemoteAddress = request.RemoteAddress,
+                    Request = new CreateRequestLogPayload.HttpPropertiesPayload.RequestPropertiesPayload
+                    {
+                        Headers = request.Headers,
+                        FormData = request.FormData,
+                        Claims = request.Claims,
+                        Cookies = request.Cookies,
+                        InputStream = request.RequestBody,
+                    },
+                    Response = new CreateRequestLogPayload.HttpPropertiesPayload.ResponsePropertiesPayload
+                    {
+                        StatusCode = response.StatusCode,
+                        ContentLength = response.ContentLength ?? 0,
+                        Headers = response.Headers
+                    }
+                },
+                Logs = loggerContext.Logs,
+                Exceptions = loggerContext.Exceptions,
+                Keywords = new()
+            };
+
+            return payload;
+        }
+
+        public static HttpContent CreateHttpContent(LoggerContext2 loggerContext, CreateRequestLogPayload payload)
+        {
+            if (loggerContext == null)
+                throw new ArgumentNullException(nameof(loggerContext));
+
+            if (payload == null)
+                throw new ArgumentNullException(nameof(payload));
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var files = loggerContext.LoggedFiles;
+            if (!files.Any())
+                return content;
+
+            MultipartFormDataContent form = new MultipartFormDataContent();
+            form.Add(content, "RequestLog");
+
+            foreach (var file in files)
+            {
+                if (!System.IO.File.Exists(file.FilePath))
+                    continue;
+
+                form.Add(new ByteArrayContent(System.IO.File.ReadAllBytes(file.FilePath)), "Files", file.FileName);
+            }
+
+            return form;
+        }
+
         public static void WrapInTryCatch(Action fn)
         {
             if (fn == null)
