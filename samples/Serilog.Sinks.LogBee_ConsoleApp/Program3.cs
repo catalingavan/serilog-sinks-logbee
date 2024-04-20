@@ -1,17 +1,18 @@
-﻿using Serilog;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Serilog.Sinks.LogBee;
 using Serilog.Sinks.LogBee.ContextProperties;
-using System.Text.Json;
+using Serilog.Sinks.LogBee_ConsoleApp.Services;
+
+namespace Serilog.Sinks.LogBee_ConsoleApp;
 
 /// <summary>
-/// Custom configuration
+/// Using Microsoft.Extensions.Logging and Microsoft.Extensions.DependencyInjection
 /// </summary>
-class Program2
+class Program3
 {
-    static async Task Main2(string[] args)
+    static async Task Main3(string[] args)
     {
-        // using the loggerContext, you can configure the "Request"/"Response" properties
-        var loggerContext = new NonWebLoggerContext("http://application/console-app-Program2");
+        var loggerContext = new NonWebLoggerContext("http://application/console-app-Program3");
 
         Log.Logger =
             new LoggerConfiguration()
@@ -35,15 +36,23 @@ class Program2
                 )
                 .CreateLogger();
 
-        // loggerContext can be used to log files to logBee.net
-        loggerContext.LogAsFile(JsonSerializer.Serialize(new { Hello = "World" }), "File.json");
+        var services = new ServiceCollection();
+        services.AddLogging((builder) =>
+        {
+            builder.AddSerilog();
+        });
+
+        // we inject the loggerContext so we can access it later, throughout the code execution
+        services.AddSingleton(loggerContext);
+        
+        services.AddTransient<IMainService, MainService>();
+
+        var serviceProvider = services.BuildServiceProvider();
 
         try
         {
-            string name = "Serilog";
-            Log.Information("Hello, {Name}!", name);
-
-            throw new NullReferenceException("Oops...");
+            IMainService mainService = serviceProvider.GetRequiredService<IMainService>();
+            await mainService.ExecuteAsync();
         }
         catch (Exception ex)
         {
@@ -56,4 +65,3 @@ class Program2
         }
     }
 }
-

@@ -34,14 +34,6 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             return config.ReadResponseBodyContentTypes?.Any(p => contentType.Contains(p)) == true;
         }
 
-        public static AspNetCoreLoggerContext? GetLoggerContext(HttpContext context)
-        {
-            if (context.Items.TryGetValue(Constants.HTTP_LOGGER_CONTEXT, out var value) && value is AspNetCoreLoggerContext loggerContext)
-                return loggerContext;
-
-            return null;
-        }
-
         public static string? ReadStreamAsString(Stream stream, Encoding encoding)
         {
             if (stream == null || !stream.CanRead)

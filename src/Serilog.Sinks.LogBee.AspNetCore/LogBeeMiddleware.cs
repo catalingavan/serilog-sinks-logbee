@@ -1,27 +1,50 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using System.Net.Http;
+using Microsoft.Extensions.Logging;
+using System.Net;
+using System.Runtime.ExceptionServices;
 
 namespace Serilog.Sinks.LogBee.AspNetCore
 {
     internal class LogBeeMiddleware
     {
         private readonly RequestDelegate _next;
-        public LogBeeMiddleware(RequestDelegate next)
+        private readonly ILogger<LogBeeMiddleware> _logger;
+        public LogBeeMiddleware(
+            RequestDelegate next,
+            ILogger<LogBeeMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
+            ExceptionDispatchInfo? ex = null;
+
+            if (context.Response.Body != null && context.Response.Body is MirrorStreamDecorator == false)
+                context.Response.Body = new MirrorStreamDecorator(context.Response.Body);
+
             try
             {
                 await _next(context);
+            }
+            catch(Exception e)
+            {
+                ex = ExceptionDispatchInfo.Capture(e);
+                throw;
             }
             finally
             {
                 if (context.Items.TryGetValue(Constants.HTTP_LOGGER_CONTEXT, out var value) && value is AspNetCoreLoggerContext loggerContext)
                 {
+                    int statusCode = context.Response.StatusCode;
+                    if (ex != null)
+                    {
+                        loggerContext.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        _logger.LogError(ex.SourceException, $"{context.Request.Method} {context.Request.Path} error");
+                    }
+
                     await InternalHelpers.WrapInTryCatchAsync(async () =>
                     {
                         await loggerContext.FlushAsync().ConfigureAwait(false);

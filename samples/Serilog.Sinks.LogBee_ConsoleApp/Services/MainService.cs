@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Serilog.Sinks.LogBee;
+using System.Text.Json;
 
 namespace Serilog.Sinks.LogBee_ConsoleApp.Services
 {
@@ -19,7 +20,7 @@ namespace Serilog.Sinks.LogBee_ConsoleApp.Services
         {
             _logger.LogInformation("Executing main service at {DateTime}", DateTime.UtcNow);
 
-            _loggerContext.LogAsFile("Content", "File.txt");
+            _loggerContext.LogAsFile(JsonSerializer.Serialize(new { Hello = "World" }), "File.json");
 
             throw new NullReferenceException("Oops...");
         }

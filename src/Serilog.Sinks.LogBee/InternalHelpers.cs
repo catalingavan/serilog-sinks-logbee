@@ -110,7 +110,7 @@ namespace Serilog.Sinks.LogBee
                 },
                 Logs = loggerContext.Logs,
                 Exceptions = loggerContext.Exceptions,
-                Keywords = new()
+                Keywords = loggerContext.GetKeywords()
             };
 
             return payload;

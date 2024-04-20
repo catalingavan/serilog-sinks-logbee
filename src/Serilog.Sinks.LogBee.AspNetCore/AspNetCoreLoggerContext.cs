@@ -24,6 +24,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             base.Configure(apiKey, config);
         }
 
+        internal int? StatusCode { get; set; }
+
         internal override RequestProperties GetRequestProperties()
         {
             var request = _httpContext.Request;
@@ -55,8 +57,9 @@ namespace Serilog.Sinks.LogBee.AspNetCore
         internal override ResponseProperties GetResponseProperties()
         {
             var response = _httpContext.Response;
+            int statusCode = StatusCode.HasValue ? StatusCode.Value : response.StatusCode;
 
-            var result = new ResponseProperties(response.StatusCode)
+            var result = new ResponseProperties(statusCode)
             {
                 Headers = ReadResponseHeaders(_httpContext, response.Headers)
             };
@@ -91,15 +94,23 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             return new AuthenticatedUser(name);
         }
         internal override IntegrationClient GetIntegrationClient() => AspNetCoreHelpers.IntegrationClient.Value;
-        internal override List<string> GetKeywords() => _config.Keywords(_httpContext);
+        internal override List<string> GetKeywords() => _config.RequestKeywords(_httpContext);
 
         public override void Dispose()
         {
             base.Dispose();
 
-            var responseStream = GetResponseStream(_httpContext.Response);
-            if (responseStream != null)
-                responseStream.MirrorStream.Dispose();
+            if (_httpContext.Response.Body != null && _httpContext.Response.Body is MirrorStreamDecorator stream)
+            {
+                try
+                {
+                    stream.MirrorStream?.Dispose();
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
         }
 
         private string GetDisplayUrl(HttpRequest request)
