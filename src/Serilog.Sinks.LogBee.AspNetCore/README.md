@@ -41,7 +41,7 @@ app.Run();
 
 ### Configuration
 
-LogBee Sink supports multiple configuration properties, set on the `config` object.
+LogBee Sink supports multiple configuration properties that can be set using the `config` delegate parameter.
 
 ```csharp
 builder.Services.AddSerilog((services, lc) => lc
