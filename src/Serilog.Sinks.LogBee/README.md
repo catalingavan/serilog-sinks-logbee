@@ -31,6 +31,10 @@ Different use case examples can be found on the [Serilog.Sinks.LogBee_ConsoleApp
 
 ### Advanced usage
 
+Because logBee.net saves the events as "Requests", we can mock the http properties by providing a custom `ConsoleAppContextProvider`.
+
+The provider allows us to specify the "Request" url as well as the "Response" status code.
+
 ```csharp
 using Serilog;
 using Serilog.Sinks.LogBee;
