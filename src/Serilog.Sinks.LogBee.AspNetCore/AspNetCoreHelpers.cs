@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Serilog.Sinks.LogBee.ContextProperties;
+using System;
+using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Serilog.Sinks.LogBee.AspNetCore

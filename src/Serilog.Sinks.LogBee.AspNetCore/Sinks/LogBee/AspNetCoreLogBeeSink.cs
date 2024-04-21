@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Serilog.Core;
 using Serilog.Events;
+using System;
+using System.Collections.Generic;
 
 namespace Serilog.Sinks.LogBee.AspNetCore;
 
