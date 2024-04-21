@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.LogBee_ConsoleApp", "Serilog.Sinks.LogBee_ConsoleApp.csproj", "{07B84A6F-E77F-4C95-AF24-9E1C74043D06}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.LogBee", "..\..\src\Serilog.Sinks.LogBee\Serilog.Sinks.LogBee.csproj", "{96E18B21-CEAB-447C-A5C1-35B720688B78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.LogBee_ConsoleApp", "Serilog.Sinks.LogBee_ConsoleApp.csproj", "{07B84A6F-E77F-4C95-AF24-9E1C74043D06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +15,6 @@ Global
 		{07B84A6F-E77F-4C95-AF24-9E1C74043D06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07B84A6F-E77F-4C95-AF24-9E1C74043D06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07B84A6F-E77F-4C95-AF24-9E1C74043D06}.Release|Any CPU.Build.0 = Release|Any CPU
-		{96E18B21-CEAB-447C-A5C1-35B720688B78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{96E18B21-CEAB-447C-A5C1-35B720688B78}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{96E18B21-CEAB-447C-A5C1-35B720688B78}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{96E18B21-CEAB-447C-A5C1-35B720688B78}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

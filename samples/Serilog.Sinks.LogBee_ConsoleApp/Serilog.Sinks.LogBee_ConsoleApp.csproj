@@ -11,10 +11,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Serilog.Sinks.LogBee\Serilog.Sinks.LogBee.csproj" />
+    <PackageReference Include="Serilog.Sinks.LogBee" Version="1.0.1" />
   </ItemGroup>
 
 </Project>
