@@ -53,8 +53,12 @@ app.MapGet("/hello", (ILogger<Program> logger, HttpContext context) =>
     string name = "Serilog";
     logger.LogInformation("Hello, {Name}!", name);
 
-    context.GetLogBeeLoggerContext()?.LogAsFile(JsonSerializer.Serialize(new { Hello = "World" }), "File.json");
+    var loggerContext = context.GetLogBeeLoggerContext();
+    loggerContext?.LogAsFile(JsonSerializer.Serialize(new { Hello = "World" }), "File.json");
+});
 
+app.MapGet("/error", () =>
+{
     throw new NullReferenceException("Oops...");
 });
 
