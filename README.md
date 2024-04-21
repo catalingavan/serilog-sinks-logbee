@@ -2,11 +2,11 @@
 
 A collection of Serilog sinks that write events to [logBee.net](https://logbee.net).
 
-### [Serilog.Sinks.LogBee](src/Serilog.Sinks.LogBee#readme)
+## [Serilog.Sinks.LogBee](src/Serilog.Sinks.LogBee#readme)
 
 A Serilog sink used for non-web applications (Console applications, Worker services).
 
-#### Basic usage
+### Basic usage
 
 ```csharp
 using Serilog;
@@ -29,7 +29,7 @@ Log.Information("First log message from Serilog");
 Log.CloseAndFlush();
 ```
 
-#### Examples
+### Examples
 
 - [ConsoleApp/Program1.cs](samples/Serilog.Sinks.LogBee_ConsoleApp/Program1.cs): Simple usage
 
@@ -41,11 +41,11 @@ Log.CloseAndFlush();
 
 - [WorkerService](samples/Serilog.Sinks.LogBee_WorkerService/): A worker service application
 
-### [Serilog.Sinks.LogBee.AspNetCore](src/Serilog.Sinks.LogBee.AspNetCore#readme)
+## [Serilog.Sinks.LogBee.AspNetCore](src/Serilog.Sinks.LogBee.AspNetCore#readme)
 
 A Serilog sink used for web applications.
 
-#### Basic usage
+### Basic usage
 
 ```csharp
 using Serilog;
@@ -78,6 +78,6 @@ app.UseLogBeeMiddleware();
 app.Run();
 ```
 
-#### Examples
+### Examples
 
  - [WebApp](samples/Serilog.Sinks.LogBee_WebApp/)
