@@ -33,66 +33,55 @@ logBee.net saves the log events under individual "Requests".
 
 For non-web applications, a "Request" can be seen as individual "application executions". 
 
-A `ConsoleAppContextProvider` can be used to configure the "Request" associated for the captured events.
-
-Because logBee.net saves the events as "Requests", we can mock the http properties by providing a custom `ConsoleAppContextProvider`.
-
-The provider allows us to specify, among other properties, the "Request URL" as well as the "Response StatusCode", useful for filtering the executions in the logBee.net application.
+A `NonWebLoggerContext` can be used to configure the "Request" properties associated for the captured events.
 
 ```csharp
-var contextProvider = new ConsoleAppContextProvider("http://application/console/main");
-contextProvider.SetResponse(new ResponseProperties(500));
+static async Task Main(string[] args)
+{
+    var loggerContext = new NonWebLoggerContext();
+
+    Log.Logger =
+        new LoggerConfiguration()
+            .WriteTo.LogBee(
+                new LogBeeApiKey(
+                    "0337cd29-a56e-42c1-a48a-e900f3116aa8",
+                    "4f729841-b103-460e-a87c-be6bd72f0cc9",
+                    "https://api.logbee.net/"
+                ),
+                loggerContext
+            )
+            .CreateLogger();
+
+    int executionCount = 0;
+    while (true)
+    {
+        loggerContext.Reset($"http://application/execution/{executionCount}");
+
+        Log.Information("First log message from Serilog");
+
+        try
+        {
+            // execute some code
+
+            if (executionCount % 2 == 1)
+                throw new Exception("Oops, odd execution error");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error executing some code");
+            loggerContext.SetResponseProperties(new ResponseProperties(500));
+        }
+        finally
+        {
+            await loggerContext.FlushAsync();
+        }
+
+        await Task.Delay(5000);
+        executionCount++;
+    }
+}
 ```
 
 <table><tr><td>
-    <img alt="Console app request" src="https://github.com/logBee-net/serilog-sinks-logbee/assets/39127098/f34cf3b6-3bc2-4796-b6cc-1308dc9ae9c8" />
+    <img alt="ConsoleApp request" src="https://github.com/logBee-net/serilog-sinks-logbee/assets/39127098/7eceaac8-d3f7-4380-8fd2-892d90d8af3f" />
 </td></tr></table>
-
-```csharp
-using Serilog;
-using Serilog.Sinks.LogBee;
-using Serilog.Sinks.LogBee.Context;
-
-// contextProvider can be used to configure additional properties that are sent to logBee.net
-var contextProvider = new ConsoleAppContextProvider("http://application/console/main");
-
-Log.Logger =
-    new LoggerConfiguration()
-        .WriteTo.LogBee(
-            new LogBeeApiKey(
-                "__LogBee.OrganizationId__",
-                "__LogBee.ApplicationId__",
-                "https://api.logbee.net"
-            ),
-            contextProvider,
-            (config) =>
-            {
-                config.AppendExceptionDetails = (ex) =>
-                {
-                    if (ex is NullReferenceException nullRefEx)
-                        return "Don't forget to check for null references";
-
-                    return null;
-                };
-            }
-        )
-        .CreateLogger();
-
-try
-{
-    Log.Information("First log message from Serilog");
-    throw new InvalidOperationException("Oops...");
-}
-catch (Exception ex)
-{
-    Log.Error(ex, "Unhandled exception");
-
-    // because we had an error, we set the logBee.net StatusCode to 500
-    // so we can easily identify failed executions
-    contextProvider.SetResponse(new ResponseProperties(500));
-}
-finally
-{
-    await Log.CloseAndFlushAsync();
-}
-```
