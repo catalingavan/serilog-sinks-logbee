@@ -1,4 +1,4 @@
-﻿using Serilog.Sinks.LogBee.Context;
+﻿using Serilog.Sinks.LogBee.ContextProperties;
 using Serilog.Sinks.LogBee.Rest;
 using System;
 using System.Linq;
@@ -57,21 +57,20 @@ namespace Serilog.Sinks.LogBee
             return name;
         }
 
-        public static CreateRequestLogPayload CreateRequestLogPayload(LoggerContext logger)
+        public static CreateRequestLogPayload CreateRequestLogPayload(LoggerContext loggerContext)
         {
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
+            if (loggerContext == null)
+                throw new ArgumentNullException(nameof(loggerContext));
 
-            var contextProvider = logger.GetContextProvider();
-            var logBeeApiKey = logger.GetLogBeeApiKey();
+            var logBeeApiKey = loggerContext.ApiKey;
 
-            DateTime startedAt = contextProvider.GetStartedAt();
-            var request = contextProvider.GetRequestProperties();
-            var response = contextProvider.GetResponseProperties();
+            DateTime startedAt = loggerContext.StartedAt;
+            var request = loggerContext.GetRequestProperties();
+            var response = loggerContext.GetResponseProperties();
             int duration = Math.Max(0, Convert.ToInt32(Math.Round((DateTime.UtcNow - startedAt).TotalMilliseconds)));
 
-            var authenticatedUser = contextProvider.GetAuthenticatedUser();
-            var integrationClient = contextProvider.GetIntegrationClient();
+            var authenticatedUser = loggerContext.GetAuthenticatedUser();
+            var integrationClient = loggerContext.GetIntegrationClient();
 
             CreateRequestLogPayload payload = new CreateRequestLogPayload
             {
@@ -109,39 +108,33 @@ namespace Serilog.Sinks.LogBee
                         Headers = response.Headers
                     }
                 },
-                Logs = logger.GetLogs(),
-                Exceptions = logger.GetExceptions(),
-                Keywords = logger.GetContextProvider().GetKeywords()
+                Logs = loggerContext.Logs,
+                Exceptions = loggerContext.Exceptions,
+                Keywords = loggerContext.GetKeywords()
             };
 
             return payload;
         }
 
-        public static HttpContent CreateHttpContent(LoggerContext logger, CreateRequestLogPayload payload, LogBeeSinkConfiguration config)
+        public static HttpContent CreateHttpContent(LoggerContext loggerContext, CreateRequestLogPayload payload)
         {
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
+            if (loggerContext == null)
+                throw new ArgumentNullException(nameof(loggerContext));
 
             if (payload == null)
                 throw new ArgumentNullException(nameof(payload));
 
-            if (config == null)
-                throw new ArgumentNullException(nameof(config));
-
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-            var files = logger.GetContextProvider().GetLoggedFiles();
+            var files = loggerContext.LoggedFiles;
             if (!files.Any())
                 return content;
 
             MultipartFormDataContent form = new MultipartFormDataContent();
             form.Add(content, "RequestLog");
 
-            foreach(var file in files)
+            foreach (var file in files)
             {
-                if (file.FileSize > config.MaximumAllowedFileSizeInBytes)
-                    continue;
-
                 if (!System.IO.File.Exists(file.FilePath))
                     continue;
 

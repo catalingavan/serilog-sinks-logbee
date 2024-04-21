@@ -1,6 +1,5 @@
 ﻿using Serilog.Core;
 using Serilog.Events;
-using Serilog.Sinks.LogBee.Context;
 using System;
 
 namespace Serilog.Sinks.LogBee;
@@ -9,11 +8,9 @@ internal class LogBeeSink : ILogEventSink, IDisposable
 {
     private readonly LoggerContext _loggerContext;
     public LogBeeSink(
-        LogBeeApiKey apiKey,
-        ContextProvider contextProvider,
-        LogBeeSinkConfiguration config)
+        LoggerContext logerContext)
     {
-        _loggerContext = new LoggerContext(contextProvider, apiKey, config);
+        _loggerContext = logerContext ?? throw new ArgumentNullException(nameof(logerContext));
     }
 
     public void Emit(LogEvent logEvent)

@@ -2,9 +2,9 @@
 
 A Serilog sink that writes events to [logBee.net](https://logbee.net).
 
-LogBee sink keeps the events in memory and commits them only when the logger is flushed.
+Different examples can be found on the [Serilog.Sinks.LogBee_ConsoleApp](/samples/Serilog.Sinks.LogBee_ConsoleApp/) sample application.
 
-Simple usage:
+### Basic usage
 
 ```csharp
 using Serilog;
@@ -23,44 +23,65 @@ Log.Logger =
 
 Log.Information("First log message from Serilog");
 
-// flush the logger so the events are sent to logBee.net
+// LogBee sink keeps the events in memory and commits them only when the logger is flushed
 await Log.CloseAndFlushAsync();
 ```
 
-Advanced usage:
+### Advanced usage
+
+logBee.net saves the log events under individual "Requests".
+
+For non-web applications, a "Request" can be seen as individual "application executions". 
+
+A `NonWebLoggerContext` can be used to configure the "Request" properties associated for the captured events.
 
 ```csharp
-using Serilog;
-using Serilog.Sinks.LogBee;
-using Serilog.Sinks.LogBee.Context;
-
-// contextProvider can be used to configure additional properties that are sent to logBee.net
-var contextProvider = new ConsoleAppContextProvider("http://application/console/main");
-
-Log.Logger =
-    new LoggerConfiguration()
-        .WriteTo.LogBee(
-            new LogBeeApiKey(
-                "__LogBee.OrganizationId__",
-                "__LogBee.ApplicationId__",
-                "https://api.logbee.net"
-            ),
-            contextProvider
-        )
-        .CreateLogger();
-
-try
+static async Task Main(string[] args)
 {
-    Log.Information("First log message from Serilog");
-    throw new InvalidOperationException("Oops...");
-}
-catch (Exception ex)
-{
-    Log.Error(ex, "Unhandled exception");
-    contextProvider.SetResponse(new ResponseProperties(500));
-}
-finally
-{
-    await Log.CloseAndFlushAsync();
+    var loggerContext = new NonWebLoggerContext();
+
+    Log.Logger =
+        new LoggerConfiguration()
+            .WriteTo.LogBee(
+                new LogBeeApiKey(
+                    "0337cd29-a56e-42c1-a48a-e900f3116aa8",
+                    "4f729841-b103-460e-a87c-be6bd72f0cc9",
+                    "https://api.logbee.net/"
+                ),
+                loggerContext
+            )
+            .CreateLogger();
+
+    int executionCount = 0;
+    while (true)
+    {
+        loggerContext.Reset($"http://application/execution/{executionCount}");
+
+        Log.Information("First log message from Serilog");
+
+        try
+        {
+            // execute some code
+
+            if (executionCount % 2 == 1)
+                throw new Exception("Oops, odd execution error");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error executing some code");
+            loggerContext.SetResponseProperties(new ResponseProperties(500));
+        }
+        finally
+        {
+            await loggerContext.FlushAsync();
+        }
+
+        await Task.Delay(5000);
+        executionCount++;
+    }
 }
 ```
+
+<table><tr><td>
+    <img alt="ConsoleApp request" src="https://github.com/logBee-net/serilog-sinks-logbee/assets/39127098/7eceaac8-d3f7-4380-8fd2-892d90d8af3f" />
+</td></tr></table>
