@@ -4,7 +4,7 @@ A Serilog sink that writes events to [logBee.net](https://logbee.net).
 
 LogBee sink keeps the events in memory and commits them only when the logger is flushed.
 
-### Simple usage
+### Basic usage
 
 ```csharp
 using Serilog;
