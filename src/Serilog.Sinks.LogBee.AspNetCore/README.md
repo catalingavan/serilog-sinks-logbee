@@ -38,3 +38,28 @@ app.UseLogBeeMiddleware();
 
 app.Run();
 ```
+
+### Configuration
+
+LogBee Sink supports multiple configuration properties, set on the `config` object.
+
+```csharp
+builder.Services.AddSerilog((services, lc) => lc
+    .WriteTo.LogBee(new LogBeeApiKey(
+            "__LogBee.OrganizationId__",
+            "__LogBee.ApplicationId__",
+            "https://api.logbee.net"
+        ),
+        services,
+        (config) =>
+        {
+            config.ShouldReadRequestHeader = (request, header) =>
+            {
+                if (string.Equals(header.Key, "X-ApiKey", StringComparison.OrdinalIgnoreCase))
+                    return false;
+
+                return true;
+            };
+        }
+    ));
+```
