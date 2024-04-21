@@ -49,7 +49,10 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
                     await InternalHelpers.WrapInTryCatchAsync(async () =>
                     {
-                        await loggerContext.FlushAsync().ConfigureAwait(false);
+                        if(loggerContext.Config.ShouldLogRequest.Invoke(context))
+                        {
+                            await loggerContext.FlushAsync().ConfigureAwait(false);
+                        }
                     });
 
                     loggerContext.Dispose();

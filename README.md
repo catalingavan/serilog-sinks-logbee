@@ -1,4 +1,4 @@
-# Sinks
+# Serilog.Sinks
 
 A collection of Serilog sinks that write events to [logBee.net](https://logbee.net).
 

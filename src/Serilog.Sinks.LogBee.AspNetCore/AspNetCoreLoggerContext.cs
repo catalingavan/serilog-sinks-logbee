@@ -28,6 +28,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
         }
 
         internal int? StatusCode { get; set; }
+        internal LogBeeSinkAspNetCoreConfiguration Config => _config;
 
         internal override RequestProperties GetRequestProperties()
         {
