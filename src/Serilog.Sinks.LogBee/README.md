@@ -2,7 +2,7 @@
 
 A Serilog sink that writes events to [logBee.net](https://logbee.net).
 
-Different use case examples can be found on the [Serilog.Sinks.LogBee_ConsoleApp](/samples/Serilog.Sinks.LogBee_ConsoleApp/) sample application.
+Different examples can be found on the [Serilog.Sinks.LogBee_ConsoleApp](/samples/Serilog.Sinks.LogBee_ConsoleApp/) sample application.
 
 ### Basic usage
 
