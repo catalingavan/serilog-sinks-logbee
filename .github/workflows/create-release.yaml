@@ -35,9 +35,9 @@ jobs:
         run: |
           dotnet build src/Serilog.Sinks.LogBee.AspNetCore/Serilog.Sinks.LogBee.AspNetCore.csproj --configuration Release /p:Version=${{ github.event.inputs.release_version }}
 
-      # - name: Pack Serilog.Sinks.LogBee
-      #   run: |
-      #     dotnet pack src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --no-build -o . /p:PackageVersion=${{ github.event.inputs.release_version }}
+      - name: Pack Serilog.Sinks.LogBee
+        run: |
+          dotnet pack src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --no-build -o . /p:PackageVersion=${{ github.event.inputs.release_version }}
 
       - name: Pack Serilog.Sinks.LogBee.AspNetCore
         run: |
