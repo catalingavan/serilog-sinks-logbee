@@ -29,6 +29,12 @@ await Log.CloseAndFlushAsync();
 
 ### Advanced usage
 
+logBee.net saves the log events under individual "Requests".
+
+For non-web applications, a "Request" can be seen as individual "application executions". 
+
+A `ConsoleAppContextProvider` can be used to configure the "Request" associated for the captured events.
+
 Because logBee.net saves the events as "Requests", we can mock the http properties by providing a custom `ConsoleAppContextProvider`.
 
 The provider allows us to specify, among other properties, the "Request URL" as well as the "Response StatusCode", useful for filtering the executions in the logBee.net application.
