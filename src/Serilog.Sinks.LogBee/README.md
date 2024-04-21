@@ -35,6 +35,11 @@ Because logBee.net saves the events as "Requests", we can mock the http properti
 
 The provider allows us to specify the "Request" url as well as the "Response" status code.
 
+```csharp
+var contextProvider = new ConsoleAppContextProvider("http://application/console/main");
+contextProvider.SetResponse(new ResponseProperties(500));
+```
+
 <table><tr><td>
     <img alt="Console app request" src="https://github.com/logBee-net/serilog-sinks-logbee/assets/39127098/f34cf3b6-3bc2-4796-b6cc-1308dc9ae9c8" />
 </td></tr></table>
