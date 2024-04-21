@@ -4,6 +4,8 @@ A Serilog sink that writes events to [logBee.net](https://logbee.net).
 
 LogBee sink keeps the events in memory and commits them only when the logger is flushed.
 
+Different use-case examples can be found on [samples/Serilog.Sinks.LogBee_ConsoleApp](/samples/Serilog.Sinks.LogBee_ConsoleApp/).
+
 Simple usage:
 
 ```csharp
