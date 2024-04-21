@@ -6,7 +6,30 @@ A collection of Serilog sinks that write events to [logBee.net](https://logbee.n
 
 A Serilog sink used for non-web applications (Console applications, Worker services).
 
-Examples:
+#### Sample usage
+
+```csharp
+using Serilog;
+using Serilog.Sinks.LogBee;
+
+Log.Logger =
+    new LoggerConfiguration()
+        .WriteTo.LogBee(
+            new LogBeeApiKey(
+                "__LogBee.OrganizationId__",
+                "__LogBee.ApplicationId__",
+                "https://api.logbee.net"
+            )
+        )
+        .CreateLogger();
+
+Log.Information("First log message from Serilog");
+
+// flush the logger so the events are sent to logBee.net
+await Log.CloseAndFlushAsync();
+```
+
+#### Examples
 
 - [ConsoleApp/Program1.cs](samples/Serilog.Sinks.LogBee_ConsoleApp/Program1.cs): Simple usage
 

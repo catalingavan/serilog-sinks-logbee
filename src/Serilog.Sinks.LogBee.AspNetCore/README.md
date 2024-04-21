@@ -6,7 +6,7 @@ LogBee sink keeps the events in the current `HttpContext` execution and flushes 
 
 A fully working example can be found on [samples/Serilog.Sinks.LogBee_WebApp](/samples/Serilog.Sinks.LogBee_WebApp/).
 
-Basic configuration:
+### Basic configuration
 
 ```csharp
 using Serilog;
