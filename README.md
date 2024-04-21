@@ -78,6 +78,6 @@ app.UseLogBeeMiddleware();
 app.Run();
 ```
 
-#### Example
+#### Examples
 
  - [WebApp](samples/Serilog.Sinks.LogBee_WebApp/)
