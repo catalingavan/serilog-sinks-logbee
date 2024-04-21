@@ -1,4 +1,4 @@
-# ConsoleApp sample application
+# Sample console application
 
 - [Program1.cs](Program1.cs): Simple usage
 
