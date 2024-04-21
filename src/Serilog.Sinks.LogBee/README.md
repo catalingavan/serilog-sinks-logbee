@@ -33,7 +33,7 @@ await Log.CloseAndFlushAsync();
 
 Because logBee.net saves the events as "Requests", we can mock the http properties by providing a custom `ConsoleAppContextProvider`.
 
-The provider allows us to specify the "Request" url as well as the "Response" status code.
+The provider allows us to specify, among other properties, the "Request URL" as well as the "Response StatusCode", useful for filtering the executions in the logBee.net application.
 
 ```csharp
 var contextProvider = new ConsoleAppContextProvider("http://application/console/main");
