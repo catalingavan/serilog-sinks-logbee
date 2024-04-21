@@ -4,8 +4,6 @@ A Serilog sink that writes events to [logBee.net](https://logbee.net).
 
 LogBee sink keeps the events in memory and commits them only when the logger is flushed.
 
-Different use-case examples can be found on the [samples/Serilog.Sinks.LogBee_ConsoleApp](/samples/Serilog.Sinks.LogBee_ConsoleApp/) sample application.
-
 Simple usage:
 
 ```csharp
@@ -28,6 +26,8 @@ Log.Information("First log message from Serilog");
 // flush the logger so the events are sent to logBee.net
 await Log.CloseAndFlushAsync();
 ```
+
+Different use case examples can be found on the [Serilog.Sinks.LogBee_ConsoleApp](/samples/Serilog.Sinks.LogBee_ConsoleApp/) sample application.
 
 Advanced usage:
 
