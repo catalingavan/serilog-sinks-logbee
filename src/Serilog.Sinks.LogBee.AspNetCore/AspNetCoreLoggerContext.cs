@@ -144,7 +144,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
                 if (_config.ShouldReadRequestCookie.Invoke(request, keyValuePair))
                 {
-                    result.TryAdd(key, keyValuePair.Value);
+                    if (!result.ContainsKey(key))
+                        result.Add(key, keyValuePair.Value);
                 }
             }
 
@@ -167,7 +168,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 if (_config.ShouldReadRequestHeader.Invoke(request, keyValuePair))
                 {
                     string value = keyValuePair.Value.ToString();
-                    result.TryAdd(key, value);
+                    if (!result.ContainsKey(key))
+                        result.Add(key, value);
                 }
             }
 
@@ -190,7 +192,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 if(_config.ShouldReadFormData.Invoke(request, keyValuePair))
                 {
                     string value = keyValuePair.Value.ToString();
-                    result.TryAdd(key, value);
+                    if (!result.ContainsKey(key))
+                        result.Add(key, value);
                 }
             }
 
@@ -215,7 +218,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
 
                 if (_config.ShouldReadClaim.Invoke(_httpContext, claim))
                 {
-                    result.TryAdd(claim.Type, claim.Value);
+                    if(!result.ContainsKey(claim.Type))
+                        result.Add(claim.Type, claim.Value);
                 }
             }
 
@@ -238,7 +242,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
                 if (_config.ShouldReadResponseHeader.Invoke(context, keyValuePair))
                 {
                     string value = keyValuePair.Value.ToString();
-                    result.TryAdd(key, value);
+                    if (!result.ContainsKey(key))
+                        result.Add(key, value);
                 }
             }
 

@@ -2,7 +2,6 @@
 using Serilog.Core;
 using Serilog.Events;
 using System;
-using System.Collections.Generic;
 
 namespace Serilog.Sinks.LogBee.AspNetCore;
 
@@ -41,7 +40,8 @@ internal class AspNetCoreLogBeeSink : ILogEventSink
         if (loggerContext == null)
         {
             loggerContext = new AspNetCoreLoggerContext(httpContext, _config, _apiKey);
-            httpContext.Items.TryAdd(Constants.HTTP_LOGGER_CONTEXT, loggerContext);
+            if(!httpContext.Items.ContainsKey(Constants.HTTP_LOGGER_CONTEXT))
+                httpContext.Items.Add(Constants.HTTP_LOGGER_CONTEXT, loggerContext);
         }
 
         loggerContext.Emit(logEvent);
