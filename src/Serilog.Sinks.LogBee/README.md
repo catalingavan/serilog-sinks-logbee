@@ -4,7 +4,7 @@ A Serilog sink that writes events to [logBee.net](https://logbee.net).
 
 LogBee sink keeps the events in memory and commits them only when the logger is flushed.
 
-Simple usage:
+### Simple usage
 
 ```csharp
 using Serilog;
@@ -29,7 +29,7 @@ await Log.CloseAndFlushAsync();
 
 Different use case examples can be found on the [Serilog.Sinks.LogBee_ConsoleApp](/samples/Serilog.Sinks.LogBee_ConsoleApp/) sample application.
 
-Advanced usage:
+### Advanced usage
 
 ```csharp
 using Serilog;
@@ -47,7 +47,17 @@ Log.Logger =
                 "__LogBee.ApplicationId__",
                 "https://api.logbee.net"
             ),
-            contextProvider
+            contextProvider,
+            (config) =>
+            {
+                config.AppendExceptionDetails = (ex) =>
+                {
+                    if (ex is NullReferenceException nullRefEx)
+                        return "Don't forget to check for null references";
+
+                    return null;
+                };
+            }
         )
         .CreateLogger();
 
@@ -59,6 +69,9 @@ try
 catch (Exception ex)
 {
     Log.Error(ex, "Unhandled exception");
+
+    // because we had an error, we set the logBee.net StatusCode to 500
+    // so we can easily identify failed executions
     contextProvider.SetResponse(new ResponseProperties(500));
 }
 finally
