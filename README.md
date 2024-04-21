@@ -1,4 +1,4 @@
-# Sinks
+# Serilog.Sinks
 
 A collection of Serilog sinks that write events to [logBee.net](https://logbee.net).
 
@@ -26,7 +26,7 @@ Log.Logger =
 Log.Information("First log message from Serilog");
 
 // flush the logger so the events are sent to logBee.net
-await Log.CloseAndFlushAsync();
+Log.CloseAndFlush();
 ```
 
 #### Examples

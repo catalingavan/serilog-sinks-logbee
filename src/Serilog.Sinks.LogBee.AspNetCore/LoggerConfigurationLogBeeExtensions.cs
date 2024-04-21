@@ -1,6 +1,7 @@
 ﻿using Serilog.Configuration;
 using Serilog.Sinks.LogBee;
 using Serilog.Sinks.LogBee.AspNetCore;
+using System;
 
 namespace Serilog;
 

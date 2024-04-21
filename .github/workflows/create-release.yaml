@@ -1,4 +1,4 @@
-name: Create Serilog.Sinks.LogBee.AspNetCore release
+name: Create release
 on:
   workflow_dispatch:
     inputs:
@@ -35,29 +35,28 @@ jobs:
         run: |
           dotnet build src/Serilog.Sinks.LogBee.AspNetCore/Serilog.Sinks.LogBee.AspNetCore.csproj --configuration Release /p:Version=${{ github.event.inputs.release_version }}
 
+      - name: Pack Serilog.Sinks.LogBee
+        run: |
+          dotnet pack src/Serilog.Sinks.LogBee/Serilog.Sinks.LogBee.csproj --no-build -o . /p:PackageVersion=${{ github.event.inputs.release_version }}
+
       - name: Pack Serilog.Sinks.LogBee.AspNetCore
         run: |
           dotnet pack src/Serilog.Sinks.LogBee.AspNetCore/Serilog.Sinks.LogBee.AspNetCore.csproj --no-build -o . /p:PackageVersion=${{ github.event.inputs.release_version }}
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Publish NuGet packages
+        run: |
+          dotnet nuget push "./*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+
+      - name: Publish GitHub packages
+        run: |
+          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.LOGBEE_RELEASE }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/logBee-net/index.json"
+          dotnet nuget push "./*.nupkg" --source "github"
+
+      - name: Release
+        uses: softprops/action-gh-release@v2.0.4
         with:
-          path: ./*.nupkg
-
-      # - name: Publish NuGet package
-      #   run: |
-      #     dotnet nuget push "./*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
-
-      # - name: Publish GitHub package
-      #   run: |
-      #     dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.LOGBEE_RELEASE }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/logBee-net/index.json"
-      #     dotnet nuget push "./*.nupkg" --source "github"
-
-      # - name: Release
-      #   uses: softprops/action-gh-release@v2.0.4
-      #   with:
-      #     body: Serilog.Sinks.LogBee.${{ github.event.inputs.release_version }}
-      #     draft: false
-      #     tag_name: Serilog.Sinks.LogBee.${{ github.event.inputs.release_version }}
-      #     files: |
-      #       ./*.nupkg
+          body: v${{ github.event.inputs.release_version }}
+          draft: false
+          tag_name: v${{ github.event.inputs.release_version }}
+          files: |
+            ./*.nupkg
