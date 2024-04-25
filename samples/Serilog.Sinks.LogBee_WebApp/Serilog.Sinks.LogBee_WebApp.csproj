@@ -12,9 +12,4 @@
     <PackageReference Include="Serilog.Sinks.LogBee.AspNetCore" Version="1.0.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Serilog.Sinks.LogBee.AspNetCore\Serilog.Sinks.LogBee.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\src\Serilog.Sinks.LogBee\Serilog.Sinks.LogBee.csproj" />
-  </ItemGroup>
-
 </Project>
