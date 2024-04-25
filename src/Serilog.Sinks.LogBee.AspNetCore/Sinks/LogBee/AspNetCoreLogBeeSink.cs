@@ -7,6 +7,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore;
 
 internal class AspNetCoreLogBeeSink : ILogEventSink
 {
+    internal static SinkConfiguration? SinkConfig { get; private set; }
+
     private readonly LogBeeApiKey _apiKey;
     private readonly IServiceProvider _serviceProvider;
     private readonly LogBeeSinkAspNetCoreConfiguration _config;
@@ -18,6 +20,8 @@ internal class AspNetCoreLogBeeSink : ILogEventSink
         _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _config = config ?? throw new ArgumentNullException(nameof(config));
+
+        SinkConfig = new SinkConfiguration(apiKey, config);
     }
 
     public void Emit(LogEvent logEvent)
@@ -45,5 +49,19 @@ internal class AspNetCoreLogBeeSink : ILogEventSink
         }
 
         loggerContext.Emit(logEvent);
+    }
+
+    internal class SinkConfiguration
+    {
+        public LogBeeApiKey ApiKey { get; private set; }
+        public LogBeeSinkAspNetCoreConfiguration Config { get; private set; }
+
+        public SinkConfiguration(
+            LogBeeApiKey apiKey,
+            LogBeeSinkAspNetCoreConfiguration config)
+        {
+            ApiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
+            Config = config ?? throw new ArgumentNullException(nameof(config));
+        }
     }
 }
