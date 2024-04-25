@@ -38,7 +38,8 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             }
             finally
             {
-                if (context.Items.TryGetValue(Constants.HTTP_LOGGER_CONTEXT, out var value) && value is AspNetCoreLoggerContext loggerContext)
+                var loggerContext = context.GetOrCreateLoggerContext();
+                if (loggerContext != null)
                 {
                     int statusCode = context.Response.StatusCode;
                     if (ex != null)

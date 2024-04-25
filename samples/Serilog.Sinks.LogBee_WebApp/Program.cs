@@ -5,6 +5,7 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddControllers();
 
 builder.Services.AddSerilog((services, lc) => lc
     .ReadFrom.Configuration(builder.Configuration)
@@ -17,6 +18,25 @@ builder.Services.AddSerilog((services, lc) => lc
         services,
         (config) =>
         {
+            config.ShouldReadRequestHeader = (request, header) =>
+            {
+                if (string.Equals(header.Key, "X-Api-Key", StringComparison.OrdinalIgnoreCase))
+                    return false;
+
+                return true;
+            };
+
+            config.ShouldLogRequest = (context) =>
+            {
+                if(string.Equals(context.Request.Path, "/status/healthcheck", StringComparison.OrdinalIgnoreCase)
+                   && context.Response.StatusCode < 400)
+                {
+                    return false;
+                }
+
+                return true;
+            };
+
             config.AppendExceptionDetails = (ex) =>
             {
                 if (ex is NullReferenceException nullRefEx)
@@ -61,6 +81,10 @@ app.MapGet("/error", () =>
 {
     throw new NullReferenceException("Oops...");
 });
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.UseLogBeeMiddleware();
 

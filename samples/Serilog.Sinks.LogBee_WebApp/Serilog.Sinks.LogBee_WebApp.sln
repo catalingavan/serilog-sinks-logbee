@@ -5,6 +5,10 @@ VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.LogBee_WebApp", "Serilog.Sinks.LogBee_WebApp.csproj", "{D40A0B11-EDCC-4CF2-BA9F-95D927542225}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.LogBee.AspNetCore", "..\..\src\Serilog.Sinks.LogBee.AspNetCore\Serilog.Sinks.LogBee.AspNetCore.csproj", "{2494F70A-CC73-452B-93AF-0F6EBEB4AE9B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.LogBee", "..\..\src\Serilog.Sinks.LogBee\Serilog.Sinks.LogBee.csproj", "{34D2AED3-85F2-4C9A-BB4D-4BA0E3E34F8F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{D40A0B11-EDCC-4CF2-BA9F-95D927542225}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D40A0B11-EDCC-4CF2-BA9F-95D927542225}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D40A0B11-EDCC-4CF2-BA9F-95D927542225}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2494F70A-CC73-452B-93AF-0F6EBEB4AE9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2494F70A-CC73-452B-93AF-0F6EBEB4AE9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2494F70A-CC73-452B-93AF-0F6EBEB4AE9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2494F70A-CC73-452B-93AF-0F6EBEB4AE9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34D2AED3-85F2-4C9A-BB4D-4BA0E3E34F8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34D2AED3-85F2-4C9A-BB4D-4BA0E3E34F8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34D2AED3-85F2-4C9A-BB4D-4BA0E3E34F8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34D2AED3-85F2-4C9A-BB4D-4BA0E3E34F8F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
