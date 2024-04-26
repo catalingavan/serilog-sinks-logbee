@@ -5,6 +5,9 @@ namespace Serilog.Sinks.LogBee.ContextProperties
 {
     public class RequestProperties
     {
+        private const string DEFAULT_URI = "http://application";
+        private const string DEFAULT_HTTP_METHOD = "GET";
+
         public Uri AbsoluteUri { get; }
         public string Method { get; }
         public Dictionary<string, string>? Headers { get; set; }
@@ -14,18 +17,12 @@ namespace Serilog.Sinks.LogBee.ContextProperties
         public string? RequestBody { get; set; }
         public string? RemoteAddress { get; set; }
 
-        public RequestProperties(Uri absoluteUri, string method)
+        public RequestProperties(string url = DEFAULT_URI, string method = DEFAULT_HTTP_METHOD)
         {
-            if (absoluteUri == null)
-                throw new ArgumentNullException(nameof(absoluteUri));
-
-            if (!absoluteUri.IsAbsoluteUri)
-                throw new ArgumentException($"{nameof(absoluteUri)} must be an absolute URI");
-
             if (string.IsNullOrWhiteSpace(method))
                 throw new ArgumentNullException(nameof(method));
 
-            AbsoluteUri = absoluteUri;
+            AbsoluteUri = InternalHelpers.CreateLoggerContextUri(url);
             Method = method;
         }
     }

@@ -38,6 +38,18 @@ namespace Serilog.Sinks.LogBee
             return new IntegrationClient(name, assemblyName.Version ?? new Version(0, 0, 1));
         }
 
+        public static Uri CreateLoggerContextUri(string url)
+        {
+            Uri? absoluteUri = null;
+            if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
+                absoluteUri = uri.IsAbsoluteUri ? uri : new Uri(new Uri("http://application"), uri);
+
+            if (absoluteUri == null)
+                absoluteUri = new Uri("http://application", UriKind.Absolute);
+
+            return absoluteUri;
+        }
+
         public static string? GetMachineName()
         {
             string? name = null;
