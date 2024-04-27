@@ -18,7 +18,7 @@ public class NonWebLoggerContext : LoggerContext
 
     public NonWebLoggerContext(string url = DEFAULT_URI, string httpMethod = DEFAULT_HTTP_METHOD)
     {
-        _requestProperties = new RequestProperties(new Uri(DEFAULT_URI), DEFAULT_HTTP_METHOD);
+        _requestProperties = new RequestProperties(url, DEFAULT_HTTP_METHOD);
         _responseProperties = new ResponseProperties(DEFAULT_STATUS_CODE);
         _keywords = new();
 
@@ -35,17 +35,7 @@ public class NonWebLoggerContext : LoggerContext
     /// </summary>
     public void Reset(string url = DEFAULT_URI, string httpMethod = DEFAULT_HTTP_METHOD)
     {
-        if (string.IsNullOrWhiteSpace(httpMethod))
-            throw new ArgumentNullException(nameof(httpMethod));
-
-        Uri? absoluteUri = null;
-        if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
-            absoluteUri = uri.IsAbsoluteUri ? uri : new Uri(new Uri("http://application"), uri);
-
-        if (absoluteUri == null)
-            absoluteUri = new Uri("http://application", UriKind.Absolute);
-
-        _requestProperties = new RequestProperties(absoluteUri, httpMethod);
+        _requestProperties = new RequestProperties(url, httpMethod);
         _responseProperties = new ResponseProperties(200);
         _keywords = new();
 
@@ -53,11 +43,16 @@ public class NonWebLoggerContext : LoggerContext
     }
 
     /// <summary>
-    /// Sets the Request properties of the loggerContext (implicitly what will be sent to logbee.net). Using this method also resets the loggerContext.
+    /// Sets the Request properties of the loggerContext (implicitly what will be sent to logbee.net).
+    /// Using this method also resets the loggerContext.
     /// </summary>
-    public void SetRequestProperties(RequestProperties properties)
+    public void Reset(RequestProperties properties)
     {
         _requestProperties = properties ?? throw new ArgumentNullException(nameof(properties));
+        _responseProperties = new ResponseProperties(200);
+        _keywords = new();
+
+        base.InternalReset();
     }
 
     /// <summary>
