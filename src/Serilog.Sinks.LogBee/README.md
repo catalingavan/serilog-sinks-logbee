@@ -190,7 +190,7 @@ class Program
 ```
 
 <table><tr><td>
-    <img alt="Request properties" src="https://github.com/logBee-net/serilog-sinks-logbee/assets/39127098/33391ff6-a767-4f08-bb42-1fd1b2a6dce9" />
+    <img alt="Request properties" src="https://github.com/logBee-net/serilog-sinks-logbee/assets/39127098/2a9a5290-62ae-4365-bc6b-6552d7872f85" />
 </td></tr></table>
 
 ### Logging files
