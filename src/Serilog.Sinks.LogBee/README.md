@@ -2,6 +2,8 @@
 
 A Serilog sink that writes events to [logBee.net](https://logbee.net).
 
+[Documentation](https://logbee.net/Docs/Integrations.Serilog-net.console-apps.index.html)
+
 ### Basic usage
 
 ```csharp
