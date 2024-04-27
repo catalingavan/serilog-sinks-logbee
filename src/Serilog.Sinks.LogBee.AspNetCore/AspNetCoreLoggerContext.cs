@@ -35,7 +35,7 @@ namespace Serilog.Sinks.LogBee.AspNetCore
             var request = _httpContext.Request;
             Uri requestUri = new Uri(GetDisplayUrl(_httpContext.Request), UriKind.Absolute);
 
-            var result = new RequestProperties(requestUri, request.Method)
+            var result = new RequestProperties(requestUri.ToString(), request.Method)
             {
                 Headers = ReadRequestHeaders(request, request.Headers),
                 Cookies = ReadRequestCookies(request, request.Cookies),
