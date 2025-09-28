@@ -1,6 +1,10 @@
-# Serilog.Sinks
+# Logbee Serilog Sinks
 
-A collection of Serilog sinks that write events to [logBee.net](https://logbee.net).
+[![Serilog.Sinks.LogBee](https://img.shields.io/nuget/v/Serilog.Sinks.LogBee.svg?style=flat-square&label=Serilog.Sinks.LogBee)](https://www.nuget.org/packages?q=Serilog.Sinks.LogBee)
+[![Serilog.Sinks.LogBee.AspNetCore](https://img.shields.io/nuget/v/Serilog.Sinks.LogBee.AspNetCore.svg?style=flat-square&label=Serilog.Sinks.LogBee.AspNetCore)](https://www.nuget.org/packages?q=Serilog.Sinks.LogBee.AspNetCore)<br>
+[![Downloads](https://img.shields.io/nuget/dt/Serilog.Sinks.LogBee.svg?style=flat-square&label=Downloads)](https://www.nuget.org/packages?q=Serilog.Sinks.LogBee)
+
+A collection of Serilog sinks that write events to [logbee.net](https://logbee.net).
 
 <table><tr><td>
     <img alt="Request view" src="https://github.com/logBee-net/serilog-sinks-logbee/assets/39127098/857e1e74-ef7a-428b-87a8-b4272b469241" />
